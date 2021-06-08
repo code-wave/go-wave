@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+    api:
+        environment:
+            POSTGRES_PASSWORD: password
+            POSTGRES_USER: project
+            POSTGRES_DB: projectdb
+            POSTGRES_HOST: postgres
+            POSTGRES_PORT: 5432
+        restart: always
+
+
+    postgres:
+        image: postgres:13.2
+        ports:
+            - 54320:5432
+        environment:
+            POSTGRES_PASSWORD: password
+            POSTGRES_USER: project
+            POSTGRES_DB: projectdb
+        volumes:
+            - ./db/sql/:/docker-entrypoint-initdb.d/
+            - postgres_data:/var/lib/postgresql/data
+
+    pgadmin:
+        image: dpage/pgadmin4
+        ports:
+            - 54330:80
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@admin.com
+            PGADMIN_DEFAULT_PASSWORD: password
+        volumes:
+            - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+    postgres_data:
