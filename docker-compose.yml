@@ -20,11 +20,6 @@ services:
             - 58080:8080
         command: ./start
 
-    front:
-        image: node:latest
-        ports:
-            - 53000:3000
-
     postgres:
         image: postgres:13.2
         ports:
