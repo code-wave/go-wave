@@ -8,17 +8,17 @@ import (
 	"github.com/code-wave/go-wave/infrastructure/helpers"
 )
 
-type StudyPostRepo struct {
+type studyPostRepo struct {
 	db *sql.DB
 }
 
-func NewStudyPostRepo(db *sql.DB) *StudyPostRepo {
-	return &StudyPostRepo{db}
+func NewStudyPostRepo(db *sql.DB) *studyPostRepo {
+	return &studyPostRepo{db}
 }
 
-var _ repository.StudyPostRepository = &StudyPostRepo{}
+var _ repository.StudyPostRepository = &studyPostRepo{}
 
-func (s *StudyPostRepo) SavePost(studyPost *entity.StudyPost, userID int64) (*entity.StudyPost, error) {
+func (s *studyPostRepo) SavePost(studyPost *entity.StudyPost) (*entity.StudyPost, error) {
 	stmt, err := s.db.Prepare(`
 		INSERT INTO study_post (user_id, title, topic, content, num_of_members, is_mento, price, start_date, end_date, is_online, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
@@ -29,7 +29,7 @@ func (s *StudyPostRepo) SavePost(studyPost *entity.StudyPost, userID int64) (*en
 
 	currentTime := helpers.GetCurrentTimeForDB()
 
-	_, err = stmt.Exec(userID, studyPost.Title, studyPost.Topic, studyPost.Content,
+	_, err = stmt.Exec(studyPost.UserID, studyPost.Title, studyPost.Topic, studyPost.Content,
 		studyPost.NumOfMembers, studyPost.IsMento, studyPost.Price, studyPost.StartDate, studyPost.EndDate,
 		currentTime, currentTime)
 	if err != nil {
@@ -39,7 +39,7 @@ func (s *StudyPostRepo) SavePost(studyPost *entity.StudyPost, userID int64) (*en
 	return studyPost, nil
 }
 
-func (s *StudyPostRepo) GetPost(id uint64) (*entity.StudyPost, error) {
+func (s *studyPostRepo) GetPost(id uint64) (*entity.StudyPost, error) {
 	row := s.db.QueryRow(`
 		SELECT id, user_id, title, topic, content, num_of_members, is_mento, price, start_date, 
 		       end_date, is_online, created_at, updated_at
@@ -64,7 +64,7 @@ func (s *StudyPostRepo) GetPost(id uint64) (*entity.StudyPost, error) {
 	return &studyPost, nil
 }
 
-func (s *StudyPostRepo) GetPostsInLatestOrder(limit uint64) (entity.StudyPosts, error) { // TODO: uint64 맞나? (프론트와 통신할때)
+func (s *studyPostRepo) GetPostsInLatestOrder(limit uint64) (entity.StudyPosts, error) { // TODO: uint64 맞나? (프론트와 통신할때)
 	rows, err := s.db.Query(`
 		SELECT id, user_id, title, topic, content, num_of_members, is_mento, price, start_date, 
 		       end_date, is_online, created_at, updated_at
