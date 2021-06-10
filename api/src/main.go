@@ -24,7 +24,11 @@ func main() {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
 	userApp := application.NewUserApp(services.User)
 	userHandler := interfaces.NewUserHandler(userApp)
-	r.Post("/user/signup", (userHandler.SaveUser))
+	r.Post("/users/signup", userHandler.SaveUser)
+	r.Get("/users/{user_id}", userHandler.GetUser)
+	r.Get("/users/limit={limit}&offset={offset}", userHandler.GetAllUsers)
+	r.Patch("/users/{user_id}", userHandler.UpdateUser)
+	r.Delete("/users/{user_id}", userHandler.DeleteUser)
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

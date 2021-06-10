@@ -6,5 +6,10 @@ import (
 )
 
 type UserRepository interface {
-	Save(*entity.User) (*entity.User, *errors.RestErr)
+	Save(*entity.User) *errors.RestErr
+	Get(*entity.User) *errors.RestErr
+	GetAll(int64, int64) (entity.Users, *errors.RestErr)
+	Update(*entity.User) *errors.RestErr
+	Delete(uint64) *errors.RestErr
+	FindByEmailAndPassword(*entity.User) (*entity.User, *errors.RestErr)
 }

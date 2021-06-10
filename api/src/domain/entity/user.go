@@ -58,6 +58,7 @@ func (user *User) Validate() *errors.RestErr {
 func (u *User) BeforeSave() *errors.RestErr {
 	u.Password, _ = encryption.Hash(u.Password)
 	u.CreatedAt = date.GetDateString(time.Now())
+
 	return nil
 }
 
@@ -81,7 +82,16 @@ func (u *User) ResponseJSON() interface{} {
 	user := u.PublicUser()
 	uJSON, err := json.Marshal(user)
 	if err != nil {
-		return nil
+		return err
+	}
+	return uJSON
+}
+
+func (u *Users) ResponseJSON() interface{} {
+	users := u.PublicUsers()
+	uJSON, err := json.Marshal(users)
+	if err != nil {
+		return err
 	}
 	return uJSON
 }
