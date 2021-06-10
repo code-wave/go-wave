@@ -1,12 +1,11 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"github.com/code-wave/go-wave/infrastructure/persistence"
 	"github.com/code-wave/go-wave/utils/config"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"log"
+	"net/http"
 )
 
 func main() {
@@ -16,6 +15,8 @@ func main() {
 		return
 	}
 	defer services.Close()
+
+	//interfaces.NewStudyPost(services.StudyPost)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
