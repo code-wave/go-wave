@@ -78,3 +78,12 @@ func (ua *UserApp) UpdateUser(user entity.User) (*entity.User, *errors.RestErr) 
 func (ua *UserApp) DeleteUser(userID uint64) *errors.RestErr {
 	return ua.ur.Delete(userID)
 }
+
+func (ua *UserApp) LoginUser(lu entity.User) (map[string]string, *errors.RestErr) {
+	user, err := ua.ur.FindByEmailAndPassword(&lu)
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]string{"user": user.Email}, nil
+}
