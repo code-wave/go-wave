@@ -3,6 +3,7 @@ package persistence
 import (
 	"database/sql"
 	"fmt"
+	"github.com/code-wave/go-wave/domain/repository"
 	"log"
 	"time"
 )
@@ -12,7 +13,8 @@ const maxIdleDBConn = 5
 const maxDBLifetime = 5 * time.Minute
 
 type Repositories struct {
-	db *sql.DB
+	db        *sql.DB
+	StudyPost repository.StudyPostRepository
 }
 
 func NewRepositories(driver, host, port, dbUser, password, dbName string) (*Repositories, error) {
@@ -38,7 +40,8 @@ func NewRepositories(driver, host, port, dbUser, password, dbName string) (*Repo
 	log.Println("db connected successfully")
 
 	return &Repositories{
-		db: db,
+		StudyPost: NewStudyPostRepo(db),
+		db:        db,
 	}, nil
 }
 
