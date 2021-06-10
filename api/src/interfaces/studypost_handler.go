@@ -24,7 +24,7 @@ func (s *StudyPost) SavePost(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&studyPost)
 	if err != nil {
-		http.Error(w, "decode error", 500) // TODO: 에러명 나중에 수정 (아래 marshal error도)
+		http.Error(w, "decode error", 500) // TODO: 에러명 나중에 수정 (아래 에러들도)
 	}
 
 	fmt.Println(studyPost) // check용 나중에 삭제
@@ -44,6 +44,13 @@ func (s *StudyPost) SavePost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Write([]byte("success"))
+	newPost, err := s.sp.SavePost(&studyPost)
+	if err != nil {
+		http.Error(w, "save post error", 500)
+	}
+	err = json.NewEncoder(w).Encode(&newPost)
+	if err != nil {
+		http.Error(w, "encode error", 500)
+	}
 
 }
