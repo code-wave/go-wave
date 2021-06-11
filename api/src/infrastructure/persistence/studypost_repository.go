@@ -21,7 +21,7 @@ var _ repository.StudyPostRepository = &studyPostRepo{}
 func (s *studyPostRepo) SavePost(studyPost *entity.StudyPost) (*entity.StudyPost, error) {
 	stmt, err := s.db.Prepare(`
 		INSERT INTO study_post (user_id, title, topic, content, num_of_members, is_mento, price, start_date, end_date, is_online, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
 	`)
 	if err != nil {
 		return nil, errors.New("insert error") //TODO: 나중에 errors 폴더로 처리?
@@ -44,7 +44,7 @@ func (s *studyPostRepo) GetPost(id uint64) (*entity.StudyPost, error) {
 		SELECT id, user_id, title, topic, content, num_of_members, is_mento, price, start_date, 
 		       end_date, is_online, created_at, updated_at
 		FROM study_post
-		WHERE id=$1
+		WHERE id=$1;
 	`, id)
 
 	err := row.Err()
@@ -64,14 +64,14 @@ func (s *studyPostRepo) GetPost(id uint64) (*entity.StudyPost, error) {
 	return &studyPost, nil
 }
 
-func (s *studyPostRepo) GetPostsInLatestOrder(limit uint64) (entity.StudyPosts, error) { // TODO: uint64 관련해서 js의 number는 64bit float형이라 데이터 받을때 string으로 받아야함
+func (s *studyPostRepo) GetPostsInLatestOrder(limit, offset uint64) (entity.StudyPosts, error) { // TODO: uint64 관련해서 js의 number는 64bit float형이라 데이터 받을때 string으로 받아야함
 	rows, err := s.db.Query(`
 		SELECT id, user_id, title, topic, content, num_of_members, is_mento, price, start_date, 
 		       end_date, is_online, created_at, updated_at
 		FROM study_post
 		ORDER BY created_at DESC
-		LIMIT $1
-	`, limit)
+		LIMIT $1 OFFSET $2;
+	`, limit, offset)
 	if err != nil {
 		return nil, err
 	}
