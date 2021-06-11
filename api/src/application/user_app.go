@@ -22,7 +22,6 @@ type UserAppInterface interface {
 	GetAllUsers(int64, int64) (entity.Users, *errors.RestErr)
 	UpdateUser(entity.User) (*entity.User, *errors.RestErr)
 	DeleteUser(uint64) *errors.RestErr
-	LoginUser(entity.User) (map[string]string, *errors.RestErr)
 }
 
 func NewUserApp(ur repository.UserRepository) *UserApp {
@@ -77,13 +76,4 @@ func (ua *UserApp) UpdateUser(user entity.User) (*entity.User, *errors.RestErr) 
 
 func (ua *UserApp) DeleteUser(userID uint64) *errors.RestErr {
 	return ua.ur.Delete(userID)
-}
-
-func (ua *UserApp) LoginUser(lu entity.User) (map[string]string, *errors.RestErr) {
-	user, err := ua.ur.FindByEmailAndPassword(&lu)
-	if err != nil {
-		return nil, err
-	}
-
-	return map[string]string{"user": user.Email}, nil
 }
