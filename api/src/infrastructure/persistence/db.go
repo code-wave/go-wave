@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/code-wave/go-wave/domain/repository"
 )
 
 const maxOpenDBConn = 10
@@ -12,7 +14,8 @@ const maxIdleDBConn = 5
 const maxDBLifetime = 5 * time.Minute
 
 type Repositories struct {
-	db *sql.DB
+	User repository.UserRepository
+	db   *sql.DB
 }
 
 func NewRepositories(driver, host, port, dbUser, password, dbName string) (*Repositories, error) {
@@ -38,7 +41,8 @@ func NewRepositories(driver, host, port, dbUser, password, dbName string) (*Repo
 	log.Println("db connected successfully")
 
 	return &Repositories{
-		db: db,
+		User: NewUserRepository(db),
+		db:   db,
 	}, nil
 }
 
