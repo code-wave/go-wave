@@ -16,6 +16,7 @@ func NewError(message string) error {
 	return errors.New(message)
 }
 
+//400
 func NewBadRequestError(message string) *RestErr {
 	return &RestErr{
 		Message: message,
@@ -24,6 +25,7 @@ func NewBadRequestError(message string) *RestErr {
 	}
 }
 
+//404
 func NewNotFoundError(message string) *RestErr {
 	return &RestErr{
 		Message: message,
@@ -32,11 +34,30 @@ func NewNotFoundError(message string) *RestErr {
 	}
 }
 
+//500
 func NewInternalServerError(message string) *RestErr {
 	return &RestErr{
 		Message: message,
 		Status:  http.StatusInternalServerError,
 		Error:   "internal_server_error",
+	}
+}
+
+//401
+func NewForbiddenError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Status:  http.StatusNotFound,
+		Error:   "forbidden_request",
+	}
+}
+
+//403
+func NewUnauthorizedError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Status:  http.StatusNotFound,
+		Error:   "unauthorized",
 	}
 }
 
