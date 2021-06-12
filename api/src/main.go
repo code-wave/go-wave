@@ -4,8 +4,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/infrastructure/persistence"
+	"github.com/code-wave/go-wave/interfaces"
 	"github.com/code-wave/go-wave/utils/config"
+	"github.com/go-chi/chi"
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
@@ -17,5 +20,15 @@ func main() {
 	}
 	defer services.Close()
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	r := chi.NewRouter()
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
+	userApp := application.NewUserApp(services.User)
+	userHandler := interfaces.NewUserHandler(userApp)
+	r.Post("/users/signup", userHandler.SaveUser)
+	r.Get("/users/{user_id}", userHandler.GetUser)
+	r.Get("/users/limit={limit}&offset={offset}", userHandler.GetAllUsers)
+	r.Patch("/users/{user_id}", userHandler.UpdateUser)
+	r.Delete("/users/{user_id}", userHandler.DeleteUser)
+
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
