@@ -26,7 +26,7 @@ func NewAuthRepository(rClient *redis.Client) *AuthRepo {
 
 func (ar *AuthRepo) Create(rt *entity.RefreshToken) *errors.RestErr {
 	expUTC := time.Unix(rt.ExpiresAt, 0)
-	if err := ar.rClient.Set(ctx, rt.Uuid, rt.RefreshToken, expUTC.Sub(time.Now())).Err(); err != nil {
+	if err := ar.rClient.Set(ctx, rt.Uuid, rt.RefreshToken, time.Until(expUTC)).Err(); err != nil {
 		log.Println("error when save refresh token in redis")
 		redisErr := errors.NewInternalServerError("redis error")
 		return redisErr
