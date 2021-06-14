@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/code-wave/go-wave/domain/entity"
-	"github.com/code-wave/go-wave/infrastructure/date"
 	"github.com/code-wave/go-wave/utils/config"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 )
 
 var JwtWrapper = &JwtInfo{
@@ -52,7 +52,7 @@ func (j *JwtInfo) GenerateAccessToken(userID uint64) (*entity.AccessToken, error
 
 	at := &entity.AccessToken{
 		AccessToken: tokenSgined,
-		ExpiresAt:   date.GetDateString(AtExpiresTime),
+		ExpiresAt:   AtExpiresTime.Unix(),
 	}
 	return at, nil
 }
@@ -74,8 +74,10 @@ func (j *JwtInfo) GenerateRefreshToken(userID uint64) (*entity.RefreshToken, err
 	}
 
 	rt := &entity.RefreshToken{
+		Uuid:         uuid.New().String(),
 		RefreshToken: tokenSigned,
-		ExpiresAt:    date.GetDateString(RtExpiresTime),
+		UserID:       userID,
+		ExpiresAt:    RtExpiresTime.Unix(),
 	}
 
 	return rt, nil

@@ -43,7 +43,7 @@ func NewInternalServerError(message string) *RestErr {
 	}
 }
 
-//401
+//403
 func NewForbiddenError(message string) *RestErr {
 	return &RestErr{
 		Message: message,
@@ -52,7 +52,7 @@ func NewForbiddenError(message string) *RestErr {
 	}
 }
 
-//403
+//401
 func NewUnauthorizedError(message string) *RestErr {
 	return &RestErr{
 		Message: message,

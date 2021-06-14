@@ -2,7 +2,6 @@ package interfaces
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/code-wave/go-wave/application"
@@ -12,11 +11,13 @@ import (
 
 type AuthHandler struct {
 	ua application.UserAppInterface
+	au application.AuthAppInterface
 }
 
-func NewAuthHandler(ua application.UserAppInterface) *AuthHandler {
+func NewAuthHandler(ua application.UserAppInterface, au application.AuthAppInterface) *AuthHandler {
 	return &AuthHandler{
 		ua: ua,
+		au: au,
 	}
 }
 
@@ -42,16 +43,21 @@ func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rt := result["refresh_token"]
-	fmt.Println(rt)
+	rt := result["refresh_token"].(*entity.RefreshToken)
 	//save result["refreshToken"] to redis metadata
+	if authErr := ah.au.CreateAuth(rt); authErr != nil {
+		w.WriteHeader(authErr.Status)
+		w.Write(authErr.ResponseJSON().([]byte))
+		return
+	}
 
 	//respose payload(user, accessToken)
 	pUser := result["user"].(*entity.User)
-	at := result["access_token"]
+	at := result["access_token"].(*entity.AccessToken)
 	jsonData, jsonErr := json.Marshal(map[string]interface{}{
-		"user":         pUser.PublicUser(),
-		"access_token": at,
+		"user":          pUser.PublicUser(),
+		"access_token":  at,
+		"refresh_token": rt,
 	})
 
 	if jsonErr != nil {

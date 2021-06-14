@@ -6,12 +6,12 @@ type RefreshToken struct {
 	Uuid         string `json:"uuid"`
 	RefreshToken string `json:"refresh_token"`
 	UserID       uint64 `json:"user_id"`
-	ExpiresAt    string `json:"expires_at"`
+	ExpiresAt    int64  `json:"expires_at"`
 }
 
 type AccessToken struct {
 	AccessToken string `json:"access_token"`
-	ExpiresAt   string `json:"expires_at"`
+	ExpiresAt   int64  `json:"expires_at"`
 }
 
 func (at *AccessToken) ResponseJSON() interface{} {
