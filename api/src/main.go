@@ -20,6 +20,9 @@ func main() {
 	}
 	defer services.Close()
 
+	//interfaces.NewStudyPost(services.StudyPost)
+
+
 	r := chi.NewRouter()
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
 	userApp := application.NewUserApp(services.User)
