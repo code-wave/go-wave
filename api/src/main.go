@@ -32,14 +32,14 @@ func main() {
 	r.Patch("/users/{user_id}", userHandler.UpdateUser)
 	r.Delete("/users/{user_id}", userHandler.DeleteUser)
 
-	//authService, err := persistence.NewRedisDB("127.0.0.1", "6379", "")
-	//if err != nil {
-	//	log.Println(err)
-	//	return
-	//}
-	//authApp := application.NewAuthApp(authService.Auth)
-	//authHandler := interfaces.NewAuthHandler(userApp, authApp)
-	//r.Post("/auth/users/login", authHandler.LoginUser)
+	authService, err := persistence.NewRedisDB(config.RedisHost, config.RedisPort, config.RedisPassword)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	authApp := application.NewAuthApp(authService.Auth)
+	authHandler := interfaces.NewAuthHandler(userApp, authApp)
+	r.Post("/auth/users/login", authHandler.LoginUser)
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
