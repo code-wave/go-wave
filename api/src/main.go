@@ -43,6 +43,7 @@ func main() {
 	authHandler := interfaces.NewAuthHandler(userApp, authApp)
 	r.Post("/auth/users/login", authHandler.LoginUser)
 
+	//authMiddleware applyed
 	ar := chi.NewRouter()
 	ar.Use(middleware.AuthVerifyMiddleware)
 	ar.Post("/auth/users/logout", authHandler.LogoutUser)

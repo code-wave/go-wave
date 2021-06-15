@@ -16,6 +16,9 @@ services:
             POSTGRES_DB: ${PG_DB_NAME}
             POSTGRES_HOST: ${PG_HOST}
             POSTGRES_PORT: ${PG_PORT}
+            REDIS_HOST: ${REDIS_HOST}
+            REDIS_PORT: ${REDIS_PORT}
+            REDIS_PASSWORD: ${REDIS_PASSWORD}
         ports:
             - 58080:8080
         command: ./start
