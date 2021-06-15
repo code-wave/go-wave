@@ -6,8 +6,6 @@ import (
 	"github.com/code-wave/go-wave/domain/repository"
 	"log"
 	"time"
-
-	"github.com/code-wave/go-wave/domain/repository"
 )
 
 const maxOpenDBConn = 10
@@ -17,7 +15,7 @@ const maxDBLifetime = 5 * time.Minute
 type Repositories struct {
 	db        *sql.DB
 	StudyPost repository.StudyPostRepository
-	User repository.UserRepository
+	User      repository.UserRepository
 }
 
 func NewRepositories(driver, host, port, dbUser, password, dbName string) (*Repositories, error) {
@@ -45,7 +43,7 @@ func NewRepositories(driver, host, port, dbUser, password, dbName string) (*Repo
 	return &Repositories{
 		db:        db,
 		StudyPost: NewStudyPostRepo(db),
-    User: NewUserRepository(db),
+		User:      NewUserRepository(db),
 	}, nil
 }
 

@@ -28,15 +28,15 @@ func (s *StudyPost) GetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	studyPost, err := s.sp.GetPost(postID)
-	if err != nil {
-		http.Error(w, err.Error(), 500) // TODO: 나중에 더 디테일하게
+	studyPost, restErr := s.sp.GetPost(postID)
+	if restErr != nil {
+		http.Error(w, "error", 500) // TODO: 나중에 더 디테일하게
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(&studyPost)
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		http.Error(w, "error", 500)
 		return
 	}
 }
@@ -56,9 +56,9 @@ func (s *StudyPost) GetPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	studyPosts, err := s.sp.GetPostsInLatestOrder(limit, offset)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
+	studyPosts, restErr := s.sp.GetPostsInLatestOrder(limit, offset)
+	if restErr != nil {
+		http.Error(w, "error", 500)
 		return
 	}
 
@@ -81,8 +81,8 @@ func (s *StudyPost) SavePost(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(studyPost) // check용 나중에 삭제
 
-	validateErr := studyPost.Validate() // TODO: 그냥 map[string]string말고 err로 할까?
-	if len(validateErr) > 0 {
+	validateErr := studyPost.Validate()
+	if validateErr != nil {
 		jsonData, err := json.Marshal(validateErr)
 		if err != nil {
 			http.Error(w, "marshal error", 500)
@@ -96,8 +96,8 @@ func (s *StudyPost) SavePost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	newPost, err := s.sp.SavePost(&studyPost)
-	if err != nil {
+	newPost, restErr := s.sp.SavePost(&studyPost)
+	if restErr != nil {
 		http.Error(w, "save post error", 500)
 	}
 

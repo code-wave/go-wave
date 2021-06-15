@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"github.com/code-wave/go-wave/infrastructure/errors"
 	"github.com/code-wave/go-wave/infrastructure/helpers"
 )
 
@@ -23,39 +24,36 @@ type StudyPost struct {
 	UpdatedAt    string `json:"updated_at"`
 }
 
-func (s *StudyPost) Validate() map[string]string {
-	var errorMessages = make(map[string]string)
-	var err error
-
-	err = helpers.CheckStringMinChar(s.Title, 5)
+func (s *StudyPost) Validate() *errors.RestErr {
+	err := helpers.CheckStringMinChar(s.Title, 5)
 	if err != nil {
-		errorMessages["invalid_title"] = err.Error()
+		return errors.NewBadRequestError(err.Error())
 	}
 
 	err = helpers.CheckStringMinChar(s.Topic, 5)
 	if err != nil {
-		errorMessages["invalid_topic"] = err.Error()
+		return errors.NewBadRequestError(err.Error())
 	}
 
 	err = helpers.CheckStringMinChar(s.Content, 20)
 	if err != nil {
-		errorMessages["invalid_content"] = err.Error()
+		return errors.NewBadRequestError(err.Error())
 	}
 
 	if s.NumOfMembers <= 0 {
-		errorMessages["invalid_number_of_members"] = "number of members can't be 0 or negative"
+		return errors.NewBadRequestError("number of members can't be 0 or negative")
 	}
 
 	if s.Price < 0 {
-		errorMessages["invalid_price"] = "price can't be negative"
+		return errors.NewBadRequestError("price can't be negative")
 	}
 
 	if s.StartDate == "" {
-		errorMessages["invalid_start_date"] = "empty start date" // TODO: 이거랑 enddate 같이 오류 더 디테일하게
+		return errors.NewBadRequestError("empty start date") // TODO: 이거랑 enddate 같이 오류 더 디테일하게
 	}
 
 	if s.EndDate == "" {
-		errorMessages["invalid_end_date"] = "empty end date"
+		return errors.NewBadRequestError("empty end date")
 	}
 
 	return nil

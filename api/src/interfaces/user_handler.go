@@ -9,7 +9,7 @@ import (
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/infrastructure/errors"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 type UserHandler struct {
