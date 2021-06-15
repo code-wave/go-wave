@@ -8,6 +8,9 @@ services:
             POSTGRES_DB: projectdb
             POSTGRES_HOST: postgres
             POSTGRES_PORT: 5432
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+            REDIS_PASSWORD: redis_password
         restart: always
 
 
@@ -33,5 +36,16 @@ services:
         volumes:
             - pgadmin_data:/var/lib/pgadmin
 
+    redis:
+        image: "redis:alpine"
+        ports:                  
+            - "56379:6379"
+        environment:
+            REDIS_PASSWORD: redis_password
+        volumes:
+            - "redis_data:/data"
+        command: redis-server --requirepass redis_password
+        
 volumes:
     postgres_data:
+    redis_data:

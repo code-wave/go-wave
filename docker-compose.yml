@@ -42,6 +42,17 @@ services:
         volumes:
             - pgadmin_data:/var/lib/pgadmin
 
+    redis:
+        image: "redis:alpine"
+        ports:                  
+            - "56379:6379"
+        environment:
+            REDIS_PASSWORD: ${REDIS_PASSWORD}
+        volumes:
+            - "redis_data:/data"
+        command: redis-server --requirepass ${REDIS_PASSWORD}
+
 volumes:
     postgres_data:
     pgadmin_data:
+    redis_data:
