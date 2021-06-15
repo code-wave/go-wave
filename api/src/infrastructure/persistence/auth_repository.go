@@ -34,17 +34,29 @@ func (ar *AuthRepo) Create(rt *entity.RefreshToken) *errors.RestErr {
 
 	return nil
 }
-func (ar *AuthRepo) Delete() {}
+
+func (ar *AuthRepo) Delete(uuid string) *errors.RestErr {
+	deleted, err := ar.rClient.Del(ctx, uuid).Result()
+	//del success, then return 1
+	if err != nil || deleted != 1 {
+		log.Println("error when delete refresh token in redis")
+		redisErr := errors.NewUnauthorizedError("unauthorized, refresh token is not valid")
+		return redisErr
+	}
+	return nil
+}
+
 func (ar *AuthRepo) Fetch(uuid string) (string, *errors.RestErr) {
 	rtRedis, err := ar.rClient.Get(ctx, uuid).Result()
 	if err != nil {
 		if err == redis.Nil {
-			redisErr := errors.NewNotFoundError("not found value")
+			redisErr := errors.NewUnauthorizedError("unauthorized, not found value")
 			return "", redisErr
 		}
-		redisErr := errors.NewUnauthorizedError("refresh token is not valid")
+		redisErr := errors.NewUnauthorizedError("unauthorized, refresh token is not valid")
 		log.Println("error when get refresh token in redis, ", err)
 		return "", redisErr
 	}
+
 	return rtRedis, nil
 }

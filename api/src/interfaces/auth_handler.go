@@ -2,11 +2,15 @@ package interfaces
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+
+	"github.com/code-wave/go-wave/infrastructure/helpers"
 
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/infrastructure/errors"
+	"github.com/code-wave/go-wave/interfaces/middleware"
 )
 
 type AuthHandler struct {
@@ -22,7 +26,7 @@ func NewAuthHandler(ua application.UserAppInterface, au application.AuthAppInter
 }
 
 func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	helpers.SetJsonHeader(w)
 	var lu *entity.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&lu); err != nil {
 		restErr := errors.NewBadRequestError("invalid json body")
@@ -44,6 +48,13 @@ func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rt := result["refresh_token"].(*entity.RefreshToken)
+	rtCookie := http.Cookie{
+		Name:     "refresh_uuid",
+		Value:    rt.Uuid,
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &rtCookie)
+
 	//save result["refreshToken"] to redis metadata
 	if authErr := ah.au.CreateAuth(rt); authErr != nil {
 		w.WriteHeader(authErr.Status)
@@ -69,4 +80,24 @@ func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonData)
+}
+
+func (ah *AuthHandler) LogoutUser(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+	userID := r.Context().Value(middleware.ContextKeyTokenUserID)
+	refreshUuid, err := r.Cookie("refresh_uuid")
+	if err != nil {
+		restErr := errors.NewBadRequestError("cannot get refresh_uuid from cookie")
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	if authErr := ah.au.DeleteAuth(refreshUuid.Value); authErr != nil {
+		w.WriteHeader(authErr.Status)
+		w.Write(authErr.ResponseJSON().([]byte))
+		return
+	}
+
+	log.Println(userID)
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/infrastructure/persistence"
 	"github.com/code-wave/go-wave/interfaces"
+	"github.com/code-wave/go-wave/interfaces/middleware"
 	"github.com/code-wave/go-wave/utils/config"
 	"github.com/go-chi/chi/v5"
 	_ "github.com/jackc/pgx/v4/stdlib"
@@ -40,6 +41,10 @@ func main() {
 	authApp := application.NewAuthApp(authService.Auth)
 	authHandler := interfaces.NewAuthHandler(userApp, authApp)
 	r.Post("/auth/users/login", authHandler.LoginUser)
+	ar := chi.NewRouter()
+	ar.Use(middleware.AuthVerifyMiddleware)
+	ar.Post("/auth/users/logout", authHandler.LogoutUser)
+	r.Mount("/", ar)
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
