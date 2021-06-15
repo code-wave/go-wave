@@ -143,7 +143,7 @@ func (r *UserRepo) FindByEmailAndPassword(lu *entity.User) (*entity.User, *error
 
 	var user entity.User
 	if err := stmt.QueryRow(lu.Email).
-		Scan(&user.ID, &user.Password, &user.Password, &user.Name, &user.Nickname, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		Scan(&user.ID, &user.Email, &user.Password, &user.Name, &user.Nickname, &user.CreatedAt, &user.UpdatedAt); err != nil {
 		if strings.Contains(err.Error(), "no rows in result set") {
 			return nil, errors.NewNotFoundError("does not exist that email in database")
 		}
