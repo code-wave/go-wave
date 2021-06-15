@@ -38,12 +38,15 @@ func main() {
 		log.Println(err)
 		return
 	}
+
 	authApp := application.NewAuthApp(authService.Auth)
 	authHandler := interfaces.NewAuthHandler(userApp, authApp)
 	r.Post("/auth/users/login", authHandler.LoginUser)
+
 	ar := chi.NewRouter()
 	ar.Use(middleware.AuthVerifyMiddleware)
 	ar.Post("/auth/users/logout", authHandler.LogoutUser)
+	ar.Post("/auth/users/refresh", authHandler.Refresh)
 	r.Mount("/", ar)
 
 	log.Fatal(http.ListenAndServe(":8080", r))

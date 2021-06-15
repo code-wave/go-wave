@@ -99,5 +99,40 @@ func (ah *AuthHandler) LogoutUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	result, _ := json.Marshal(map[string]string{"result": "success"})
+	w.WriteHeader(http.StatusOK)
+	w.Write(result)
+
 	log.Println(userID)
+}
+
+func (ah *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+	refreshUuid, err := r.Cookie("refresh_uuid")
+	if err != nil {
+		restErr := errors.NewBadRequestError("cannot get refresh_uuid from cookie")
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	at, authErr := ah.au.Refresh(refreshUuid.Value)
+	if authErr != nil {
+		w.WriteHeader(authErr.Status)
+		w.Write(authErr.ResponseJSON().([]byte))
+		return
+	}
+
+	jsonData, jsonErr := json.Marshal(map[string]interface{}{
+		"access_token": at,
+	})
+	if jsonErr != nil {
+		jsonErr := errors.NewInternalServerError("internal marshaling error")
+		w.WriteHeader(jsonErr.Status)
+		w.Write(jsonErr.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 }

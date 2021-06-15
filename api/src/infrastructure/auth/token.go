@@ -38,11 +38,13 @@ func (j *JwtInfo) GenerateAccessToken(userID uint64) (*entity.AccessToken, error
 	atClaims := &Claims{
 		UserID: userID,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: AtExpiresTime.Unix(),
+			ExpiresAt: time.Now().Add(15 * time.Minute).Unix(),
 			Issuer:    j.Issuer,
 			IssuedAt:  time.Now().Unix(),
 		},
 	}
+
+	log.Println(atClaims.ExpiresAt)
 
 	tokenSgined, err := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims).SignedString([]byte(j.AccessTokenKey))
 	if err != nil {
@@ -52,7 +54,7 @@ func (j *JwtInfo) GenerateAccessToken(userID uint64) (*entity.AccessToken, error
 
 	at := &entity.AccessToken{
 		AccessToken: tokenSgined,
-		ExpiresAt:   AtExpiresTime.Unix(),
+		ExpiresAt:   atClaims.ExpiresAt,
 	}
 	return at, nil
 }
@@ -61,7 +63,7 @@ func (j *JwtInfo) GenerateRefreshToken(userID uint64) (*entity.RefreshToken, err
 	rtClaims := &Claims{
 		UserID: userID,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: RtExpiresTime.Unix(),
+			ExpiresAt: time.Now().Add(24 * 7 * time.Hour).Unix(),
 			Issuer:    j.Issuer,
 			IssuedAt:  time.Now().Unix(),
 		},
@@ -77,7 +79,7 @@ func (j *JwtInfo) GenerateRefreshToken(userID uint64) (*entity.RefreshToken, err
 		Uuid:         uuid.New().String(),
 		RefreshToken: tokenSigned,
 		UserID:       userID,
-		ExpiresAt:    RtExpiresTime.Unix(),
+		ExpiresAt:    rtClaims.ExpiresAt,
 	}
 
 	return rt, nil
