@@ -21,34 +21,29 @@ func main() {
 	}
 	defer services.Close()
 
-	//interfaces.NewStudyPost(services.StudyPost)
-
-	r := chi.NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
-	userApp := application.NewUserApp(services.User)
-	userHandler := interfaces.NewUserHandler(userApp)
-	r.Post("/users/signup", userHandler.SaveUser)
-	r.Get("/users/{user_id}", userHandler.GetUser)
-	r.Get("/users/limit={limit}&offset={offset}", userHandler.GetAllUsers)
-	r.Patch("/users/{user_id}", userHandler.UpdateUser)
-	r.Delete("/users/{user_id}", userHandler.DeleteUser)
-
 	authService, err := persistence.NewRedisDB(config.RedisHost, config.RedisPort, config.RedisPassword)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
+	userApp := application.NewUserApp(services.User)
+	userHandler := interfaces.NewUserHandler(userApp)
+
 	authApp := application.NewAuthApp(authService.Auth)
 	authHandler := interfaces.NewAuthHandler(userApp, authApp)
-	r.Post("/auth/users/login", authHandler.LoginUser)
+	//interfaces.NewStudyPost(services.StudyPost)
 
-	//authMiddleware applyed
-	ar := chi.NewRouter()
-	ar.Use(middleware.AuthVerifyMiddleware)
-	ar.Post("/auth/users/logout", authHandler.LogoutUser)
-	ar.Post("/auth/users/refresh", authHandler.Refresh)
-	r.Mount("/", ar)
+	r := chi.NewRouter()
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
+	r.With(middleware.AuthVerifyMiddleware).Get("/users/{user_id}", userHandler.GetUser)
+	r.Get("/users/limit={limit}&offset={offset}", userHandler.GetAllUsers)
+	r.Post("/users/signup", userHandler.SaveUser)
+	r.Post("/auth/users/login", authHandler.LoginUser)
+	r.With(middleware.AuthVerifyMiddleware).Patch("/users/{user_id}", userHandler.UpdateUser)
+	r.With(middleware.AuthVerifyMiddleware).Delete("/users/{user_id}", userHandler.DeleteUser)
+	r.With(middleware.AuthVerifyMiddleware).Post("/auth/users/logout", authHandler.LogoutUser)
+	r.With(middleware.AuthVerifyMiddleware).Post("/auth/users/refresh", authHandler.Refresh)
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
