@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/domain/entity"
+	"github.com/code-wave/go-wave/infrastructure/errors"
 	"github.com/code-wave/go-wave/infrastructure/helpers"
 	"net/http"
 )
@@ -76,27 +77,22 @@ func (s *StudyPost) SavePost(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&studyPost)
 	if err != nil {
-		http.Error(w, "decode error", 500) // TODO: 에러명 나중에 수정 (아래 에러들도)
+		restErr := errors.NewBadRequestError("invalid json body") // TODO: 에러명 나중에 수정 (아래 에러들도)
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
 	}
 
-	fmt.Println(studyPost) // check용 나중에 삭제
+	fmt.Println("studypost: ", studyPost) // check용 나중에 삭제
 
-	validateErr := studyPost.Validate()
-	if validateErr != nil {
-		jsonData, err := json.Marshal(validateErr)
-		if err != nil {
-			http.Error(w, "marshal error", 500)
-			return
-		}
-
-		_, err = w.Write(jsonData)
-		if err != nil {
-			http.Error(w, "write error", 500)
-			return
-		}
+	restErr := studyPost.Validate()
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
 	}
 
-	newPost, restErr := s.sp.SavePost(&studyPost)
+	newPost, restErr := s.sp.SavePost(&studyPost) // TODO: 여기 할 차례
 	if restErr != nil {
 		http.Error(w, "save post error", 500)
 	}

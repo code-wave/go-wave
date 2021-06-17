@@ -12,9 +12,8 @@ type StudyPost struct {
 	Title        string `json:"title"` // 게시글 제목
 	Topic        string `json:"topic"` // 프로젝트 주제
 	Content      string `json:"content"`
-	TechStackID  uint64 `json:"tech_stack_id"`
 	NumOfMembers int64  `json:"num_of_members"`
-	IsMento      bool   `json:"is_mento"`
+	IsMentor     bool   `json:"is_mentor"`
 	Price        int64  `json:"price"`      // 1인당 필요한 가격
 	StartDate    string `json:"start_date"` // 프로젝트 시작
 	EndDate      string `json:"end_date"`   // 프로젝트 끝
@@ -22,6 +21,8 @@ type StudyPost struct {
 	IsOnline     bool   `json:"is_online"`
 	CreatedAt    string `json:"created_at"`
 	UpdatedAt    string `json:"updated_at"`
+
+	TechStack []string `json:"tech_stack"` // 이건 study_post table에는 존재하지 않음
 }
 
 func (s *StudyPost) Validate() *errors.RestErr {
@@ -54,6 +55,11 @@ func (s *StudyPost) Validate() *errors.RestErr {
 
 	if s.EndDate == "" {
 		return errors.NewBadRequestError("empty end date")
+	}
+
+	err = helpers.ConvertStringArray(s.TechStack) // 여기서 리스트를 조작함
+	if err != nil {
+		errors.NewBadRequestError(err.Error())
 	}
 
 	return nil

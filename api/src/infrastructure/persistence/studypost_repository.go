@@ -20,7 +20,7 @@ var _ repository.StudyPostRepository = &studyPostRepo{}
 
 func (s *studyPostRepo) SavePost(studyPost *entity.StudyPost) (*entity.StudyPost, *errors.RestErr) {
 	stmt, err := s.db.Prepare(`
-		INSERT INTO study_post (user_id, title, topic, content, num_of_members, is_mento, price, start_date, end_date, is_online, created_at, updated_at)
+		INSERT INTO study_post (user_id, title, topic, content, num_of_members, is_mentor, price, start_date, end_date, is_online, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
 	`)
 	if err != nil {
@@ -30,7 +30,7 @@ func (s *studyPostRepo) SavePost(studyPost *entity.StudyPost) (*entity.StudyPost
 	currentTime := helpers.GetCurrentTimeForDB()
 
 	_, err = stmt.Exec(studyPost.UserID, studyPost.Title, studyPost.Topic, studyPost.Content,
-		studyPost.NumOfMembers, studyPost.IsMento, studyPost.Price, studyPost.StartDate, studyPost.EndDate,
+		studyPost.NumOfMembers, studyPost.IsMentor, studyPost.Price, studyPost.StartDate, studyPost.EndDate,
 		currentTime, currentTime)
 	if err != nil {
 		return nil, errors.NewInternalServerError("execute error")
@@ -53,7 +53,7 @@ func (s *studyPostRepo) GetPost(id uint64) (*entity.StudyPost, *errors.RestErr) 
 	var studyPost entity.StudyPost
 
 	err = stmt.QueryRow(id).Scan(&studyPost.ID, &studyPost.UserID, &studyPost.Title, &studyPost.Topic, &studyPost.NumOfMembers,
-		&studyPost.IsMento, &studyPost.Price, &studyPost.StartDate, &studyPost.EndDate, &studyPost.IsOnline,
+		&studyPost.IsMentor, &studyPost.Price, &studyPost.StartDate, &studyPost.EndDate, &studyPost.IsOnline,
 		&studyPost.CreatedAt, &studyPost.UpdatedAt)
 	if err != nil {
 		return nil, errors.NewInternalServerError("database error")
@@ -86,7 +86,7 @@ func (s *studyPostRepo) GetPostsInLatestOrder(limit, offset uint64) (entity.Stud
 		var studyPost entity.StudyPost
 
 		err := rows.Scan(&studyPost.ID, &studyPost.UserID, &studyPost.Title, &studyPost.Topic, &studyPost.NumOfMembers,
-			&studyPost.IsMento, &studyPost.Price, &studyPost.StartDate, &studyPost.EndDate, &studyPost.IsOnline,
+			&studyPost.IsMentor, &studyPost.Price, &studyPost.StartDate, &studyPost.EndDate, &studyPost.IsOnline,
 			&studyPost.CreatedAt, &studyPost.UpdatedAt)
 		if err != nil {
 			return nil, errors.NewInternalServerError("database error")
