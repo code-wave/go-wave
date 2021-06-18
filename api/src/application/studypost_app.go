@@ -15,8 +15,8 @@ var _ StudyPostInterface = &studyPostApp{}
 
 type StudyPostInterface interface {
 	SavePost(studyPost *entity.StudyPost) *errors.RestErr
-	//GetPost(id uint64) (*entity.StudyPost, *errors.RestErr)
-	//GetPostsInLatestOrder(limit, offset uint64) (entity.StudyPosts, *errors.RestErr)
+	//GetPost(id int64) (*entity.StudyPost, *errors.RestErr)
+	//GetPostsInLatestOrder(limit, offset int64) (entity.StudyPosts, *errors.RestErr)
 }
 
 func NewStudyPostApp(studyPostRepo repository.StudyPostRepository, studyPostTechStackRepo repository.StudyPostTechStackRepository) *studyPostApp {
@@ -28,7 +28,7 @@ func NewStudyPostApp(studyPostRepo repository.StudyPostRepository, studyPostTech
 
 // SavePost study_post 테이블에도 저장하고 study_post_tech_stack 테이블에 (studyPostID, techStackID) 형태로도 저장
 func (s *studyPostApp) SavePost(studyPost *entity.StudyPost) *errors.RestErr {
-	err := s.studyPostRepo.SavePost(studyPost)
+	studyPost, err := s.studyPostRepo.SavePost(studyPost)
 	if err != nil {
 		return errors.NewInternalServerError(err.Message)
 	}

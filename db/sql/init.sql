@@ -45,14 +45,14 @@ create table tech_stack (
     id serial NOT NULL,
     tech_name varchar(48) UNIQUE NOT NULL,
     PRIMARY KEY(id)
-)
+);
 
 create table study_post_tech_stack (
     study_post_id bigint NOT NULL,
     tech_stack_id bigint NOT NULL,
     FOREIGN KEY (study_post_id) REFERENCES study_post (id) ON DELETE CASCADE,
     FOREIGN KEY (tech_stack_id) REFERENCES tech_stack (id)
-)
+);
 
 GRANT ALL PRIVILEGES ON TABLE users to project;
 GRANT ALL PRIVILEGES ON TABLE token to project;

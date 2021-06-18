@@ -3,8 +3,8 @@ package entity
 import "github.com/code-wave/go-wave/infrastructure/errors"
 
 type StudyPostTechStack struct {
-	StudyPostID uint64
-	TechStackID uint64
+	StudyPostID int64
+	TechStackID int64
 }
 
 func (s *StudyPostTechStack) Validate() *errors.RestErr {

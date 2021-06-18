@@ -9,7 +9,7 @@ import (
 type StudyPosts []StudyPost
 
 type StudyPost struct {
-	ID           uint64 `json:"id"`
+	ID           int64  `json:"id"`
 	Title        string `json:"title"` // 게시글 제목
 	Topic        string `json:"topic"` // 프로젝트 주제
 	Content      string `json:"content"`

@@ -18,28 +18,38 @@ func NewStudyPostRepo(db *sql.DB) *studyPostRepo {
 
 var _ repository.StudyPostRepository = &studyPostRepo{}
 
-func (s *studyPostRepo) SavePost(studyPost *entity.StudyPost) *errors.RestErr {
+func (s *studyPostRepo) SavePost(studyPost *entity.StudyPost) (*entity.StudyPost, *errors.RestErr) {
 	stmt, err := s.db.Prepare(`
 		INSERT INTO study_post (user_id, title, topic, content, num_of_members, is_mentor, price, start_date, end_date, is_online, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		RETURNING id;
 	`)
 	if err != nil {
-		return errors.NewInternalServerError("database error")
+		return nil, errors.NewInternalServerError("database error" + err.Error())
 	}
 
 	currentTime := helpers.GetCurrentTimeForDB()
 
-	_, err = stmt.Exec(studyPost.UserID, studyPost.Title, studyPost.Topic, studyPost.Content,
+	row := stmt.QueryRow(studyPost.UserID, studyPost.Title, studyPost.Topic, studyPost.Content,
 		studyPost.NumOfMembers, studyPost.IsMentor, studyPost.Price, studyPost.StartDate, studyPost.EndDate,
-		currentTime, currentTime)
+		studyPost.IsOnline, currentTime, currentTime)
+	//if err != nil {
+	//	return nil, errors.NewInternalServerError("save post execute error: " + err.Error())
+	//}
+
+	var lastInsertID int64
+
+	err = row.Scan(&lastInsertID)
 	if err != nil {
-		return errors.NewInternalServerError("execute error")
+		return nil, errors.NewInternalServerError("row scan error " + err.Error())
 	}
 
-	return nil
+	studyPost.ID = lastInsertID
+
+	return studyPost, nil
 }
 
-func (s *studyPostRepo) GetPost(id uint64) (*entity.StudyPost, *errors.RestErr) {
+func (s *studyPostRepo) GetPost(id int64) (*entity.StudyPost, *errors.RestErr) {
 	stmt, err := s.db.Prepare(`
 		SELECT id, user_id, title, topic, content, num_of_members, is_mento, price, start_date, 
 		       end_date, is_online, created_at, updated_at
@@ -62,7 +72,7 @@ func (s *studyPostRepo) GetPost(id uint64) (*entity.StudyPost, *errors.RestErr) 
 	return &studyPost, nil
 }
 
-func (s *studyPostRepo) GetPostsInLatestOrder(limit, offset uint64) (entity.StudyPosts, *errors.RestErr) { // TODO: uint64 관련해서 js의 number는 64bit float형이라 데이터 받을때 string으로 받아야함
+func (s *studyPostRepo) GetPostsInLatestOrder(limit, offset int64) (entity.StudyPosts, *errors.RestErr) { // TODO: uint64 관련해서 js의 number는 64bit float형이라 데이터 받을때 string으로 받아야함
 	stmt, err := s.db.Prepare(`
 		SELECT id, user_id, title, topic, content, num_of_members, is_mento, price, start_date, 
 		       end_date, is_online, created_at, updated_at
