@@ -6,7 +6,7 @@ import (
 )
 
 type StudyPostRepository interface {
-	SavePost(post *entity.StudyPost) (*entity.StudyPost, *errors.RestErr)
+	SavePost(post *entity.StudyPost) *errors.RestErr
 	GetPost(id uint64) (*entity.StudyPost, *errors.RestErr)
 	GetPostsInLatestOrder(limit, offset uint64) (entity.StudyPosts, *errors.RestErr)
 	UpdatePost(post *entity.StudyPost) (*entity.StudyPost, *errors.RestErr)

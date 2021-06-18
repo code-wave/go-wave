@@ -32,6 +32,16 @@ func main() {
 	r.Patch("/users/{user_id}", userHandler.UpdateUser)
 	r.Delete("/users/{user_id}", userHandler.DeleteUser)
 
+	studyPostApp := application.NewStudyPostApp(services.StudyPost, services.StudyPostTechStack)
+	studyPostHandler := interfaces.NewStudyPostHandler(studyPostApp)
+
+	r.Post("/study_post", studyPostHandler.SavePost)
+
+	techStackApp := application.NewTechStackApp(services.TechStack)
+	techStackHandler := interfaces.NewTechStackHandler(techStackApp)
+
+	r.Post("/tech_stack", techStackHandler.SaveTechStack)
+
 	//authService, err := persistence.NewRedisDB("127.0.0.1", "6379", "")
 	//if err != nil {
 	//	log.Println(err)

@@ -12,63 +12,71 @@ import (
 
 type StudyPost struct {
 	sp application.StudyPostInterface
+	//ts application.StudyPostTechStackInterface
 }
 
-func NewStudyPost(sp application.StudyPostInterface) *StudyPost {
+func NewStudyPostHandler(sp application.StudyPostInterface) *StudyPost {
 	return &StudyPost{
-		sp,
+		sp: sp,
+		//ts: ts,
 	}
 }
 
-func (s *StudyPost) GetPost(w http.ResponseWriter, r *http.Request) {
-	helpers.SetJsonHeader(w)
+//func (s *StudyPost) GetPost(w http.ResponseWriter, r *http.Request) {
+//	helpers.SetJsonHeader(w)
+//
+//	postID, restErr := helpers.ExtractUintParam(r, "post_id")
+//	if restErr != nil {
+//		w.WriteHeader(restErr.Status)
+//		w.Write(restErr.ResponseJSON().([]byte))
+//		return
+//	}
+//
+//	studyPost, restErr := s.sp.GetPost(postID)
+//	if restErr != nil {
+//		w.WriteHeader(restErr.Status)
+//		w.Write(restErr.ResponseJSON().([]byte))
+//		return
+//	}
+//
+//	sJson, restErr := studyPost.ResponseJSON()
+//	if restErr != nil {
+//		w.WriteHeader(restErr.Status)
+//		w.Write(restErr.ResponseJSON().([]byte))
+//		return
+//	}
+//
+//	w.WriteHeader(http.StatusOK)
+//	w.Write(sJson)
+//}
 
-	postID, err := helpers.ExtractUintParam(r, "post_id")
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-
-	studyPost, restErr := s.sp.GetPost(postID)
-	if restErr != nil {
-		http.Error(w, "error", 500) // TODO: 나중에 더 디테일하게
-		return
-	}
-
-	err = json.NewEncoder(w).Encode(&studyPost)
-	if err != nil {
-		http.Error(w, "error", 500)
-		return
-	}
-}
-
-func (s *StudyPost) GetPosts(w http.ResponseWriter, r *http.Request) {
-	helpers.SetJsonHeader(w)
-
-	limit, err := helpers.ExtractUintParam(r, "limit")
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-
-	offset, err := helpers.ExtractUintParam(r, "offset")
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-
-	studyPosts, restErr := s.sp.GetPostsInLatestOrder(limit, offset)
-	if restErr != nil {
-		http.Error(w, "error", 500)
-		return
-	}
-
-	err = json.NewEncoder(w).Encode(&studyPosts)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-}
+//func (s *StudyPost) GetPosts(w http.ResponseWriter, r *http.Request) { // TODO: 여기 할 차례
+//	helpers.SetJsonHeader(w)
+//
+//	limit, err := helpers.ExtractUintParam(r, "limit")
+//	if err != nil {
+//		http.Error(w, err.Error(), 400)
+//		return
+//	}
+//
+//	offset, err := helpers.ExtractUintParam(r, "offset")
+//	if err != nil {
+//		http.Error(w, err.Error(), 400)
+//		return
+//	}
+//
+//	studyPosts, restErr := s.sp.GetPostsInLatestOrder(limit, offset)
+//	if restErr != nil {
+//		http.Error(w, "error", 500)
+//		return
+//	}
+//
+//	err = json.NewEncoder(w).Encode(&studyPosts)
+//	if err != nil {
+//		http.Error(w, err.Error(), 500)
+//		return
+//	}
+//}
 
 func (s *StudyPost) SavePost(w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)
@@ -92,12 +100,21 @@ func (s *StudyPost) SavePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newPost, restErr := s.sp.SavePost(&studyPost) // TODO: 여기 할 차례
+	restErr = s.sp.SavePost(&studyPost)
 	if restErr != nil {
-		http.Error(w, "save post error", 500)
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
 	}
 
-	err = json.NewEncoder(w).Encode(&newPost)
+	//restErr = s.ts.SaveStudyPostTechStack(studyPost.ID, studyPost.TechStack) // (studyPostID, techStackID) 형태로 저장
+	//if restErr != nil {
+	//	w.WriteHeader(restErr.Status)
+	//	w.Write(restErr.ResponseJSON().([]byte))
+	//	return
+	//}
+
+	err = json.NewEncoder(w).Encode(&studyPost) // TODO: marshal로 할까? 나중에 ResponseJSON 만들어서 할까?
 	if err != nil {
 		http.Error(w, "encode error", 500)
 	}

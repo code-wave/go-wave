@@ -57,6 +57,8 @@ create table study_post_tech_stack (
 GRANT ALL PRIVILEGES ON TABLE users to project;
 GRANT ALL PRIVILEGES ON TABLE token to project;
 GRANT ALL PRIVILEGES ON TABLE study_post to project;
+GRANT ALL PRIVILEGES ON TABLE study_post_tech_stack to project;
+GRANT ALL PRIVILEGES ON TABLE tech_stack to project;
 
 insert into users (email, password, name, nickname, created_at) values ('test@naver.com', '1234', 'atg', 'nickname', NOW());
 commit;

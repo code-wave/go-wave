@@ -16,6 +16,12 @@ type TechStackInterface interface {
 	SaveTechStack(techName string) *errors.RestErr
 }
 
+func NewTechStackApp(techStackRepo repository.TechStackRepository) *techStackApp {
+	return &techStackApp{
+		techStackRepo: techStackRepo,
+	}
+}
+
 func (t *techStackApp) SaveTechStack(techName string) *errors.RestErr {
 	err := helpers.CheckStringMinChar(techName, 1)
 	if err != nil {

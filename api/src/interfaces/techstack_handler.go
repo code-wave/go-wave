@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/infrastructure/helpers"
@@ -12,7 +13,7 @@ type TechStack struct {
 	ts application.TechStackInterface
 }
 
-func NewTechStack(ts application.TechStackInterface) *TechStack {
+func NewTechStackHandler(ts application.TechStackInterface) *TechStack {
 	return &TechStack{
 		ts: ts,
 	}
@@ -26,6 +27,7 @@ func (t *TechStack) SaveTechStack(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&techStack)
 
+	fmt.Println("body: ", r.Body, "techstack: ", techStack)
 	err := t.ts.SaveTechStack(techStack.TechName)
 	if err != nil {
 		w.WriteHeader(err.Status)

@@ -20,7 +20,7 @@ func CheckStringMinChar(s string, minCharNum int) error {
 	return nil
 }
 
-// ConvertStringArray string배열을 스페이스 삭제 & 소문자로 변환
+// ConvertStringArray string 배열을 스페이스 삭제 & 소문자로 변환
 func ConvertStringArray(s []string) error {
 	if len(s) == 0 {
 		return errors.New("empty array")

@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"encoding/json"
 	"github.com/code-wave/go-wave/infrastructure/errors"
 	"github.com/code-wave/go-wave/infrastructure/helpers"
 )
@@ -63,4 +64,13 @@ func (s *StudyPost) Validate() *errors.RestErr {
 	}
 
 	return nil
+}
+
+func (s *StudyPost) ResponseJSON() ([]byte, *errors.RestErr) {
+	sJson, err := json.Marshal(s)
+	if err != nil {
+		return nil, errors.NewInternalServerError("marshal error")
+	}
+
+	return sJson, nil
 }
