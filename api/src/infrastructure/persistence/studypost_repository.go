@@ -20,8 +20,8 @@ var _ repository.StudyPostRepository = &studyPostRepo{}
 
 func (s *studyPostRepo) SavePost(studyPost *entity.StudyPost) (*entity.StudyPost, *errors.RestErr) {
 	stmt, err := s.db.Prepare(`
-		INSERT INTO study_post (user_id, title, topic, content, num_of_members, is_mentor, price, start_date, end_date, is_online, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		INSERT INTO study_post (user_id, title, topic, content, num_of_members, is_mentor, price, start_date, end_date, is_online, tech_stack, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 		RETURNING id;
 	`)
 	if err != nil {
@@ -32,10 +32,7 @@ func (s *studyPostRepo) SavePost(studyPost *entity.StudyPost) (*entity.StudyPost
 
 	row := stmt.QueryRow(studyPost.UserID, studyPost.Title, studyPost.Topic, studyPost.Content,
 		studyPost.NumOfMembers, studyPost.IsMentor, studyPost.Price, studyPost.StartDate, studyPost.EndDate,
-		studyPost.IsOnline, currentTime, currentTime)
-	//if err != nil {
-	//	return nil, errors.NewInternalServerError("save post execute error: " + err.Error())
-	//}
+		studyPost.IsOnline, studyPost.TechStack, currentTime, currentTime)
 
 	var lastInsertID int64
 
@@ -57,7 +54,7 @@ func (s *studyPostRepo) GetPost(id int64) (*entity.StudyPost, *errors.RestErr) {
 		WHERE id=$1;
 	`)
 	if err != nil {
-		return nil, errors.NewInternalServerError("datbase error")
+		return nil, errors.NewInternalServerError("datbase error" + err.Error())
 	}
 
 	var studyPost entity.StudyPost
@@ -66,7 +63,10 @@ func (s *studyPostRepo) GetPost(id int64) (*entity.StudyPost, *errors.RestErr) {
 		&studyPost.IsMentor, &studyPost.Price, &studyPost.StartDate, &studyPost.EndDate, &studyPost.IsOnline,
 		&studyPost.CreatedAt, &studyPost.UpdatedAt)
 	if err != nil {
-		return nil, errors.NewInternalServerError("database error")
+		if err == sql.ErrNoRows {
+			return nil, errors.NewBadRequestError("row doesn't exist " + err.Error())
+		}
+		return nil, errors.NewInternalServerError("database error" + err.Error())
 	}
 
 	return &studyPost, nil

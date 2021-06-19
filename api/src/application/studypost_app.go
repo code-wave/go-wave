@@ -41,11 +41,15 @@ func (s *studyPostApp) SavePost(studyPost *entity.StudyPost) *errors.RestErr {
 	return nil
 }
 
-//func (s *studyPostApp) GetPost(id uint64) (*entity.StudyPost, *errors.RestErr) {
+//func (s *studyPostApp) GetPost(id int64) (*entity.StudyPost, *errors.RestErr) {
 //	studyPost, err := s.studyPostRepo.GetPost(id)
+//	if err != nil {
+//	    return nil, err
+//	}
 //	s.studyPostTechStackRepo.
+//
 //}
-
+//
 //func (s *studyPostApp) GetPostsInLatestOrder(limit, offset uint64) (entity.StudyPosts, *errors.RestErr) {
 //	return s.studyPostRepo.GetPostsInLatestOrder(limit, offset)
 //}

@@ -35,6 +35,7 @@ create table study_post (
 	start_date varchar(48),
 	end_date varchar(48),
 	is_online boolean,
+	tech_stack text[],
 	created_at timestamp NOT NULL,
 	updated_at timestamp,
 	PRIMARY KEY(id),

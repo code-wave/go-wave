@@ -20,24 +20,17 @@ var _ repository.StudyPostTechStackRepository = &studyPostTechStackRepo{}
 // SaveStudyPostTechStack (studyPostID, techStackID)의 형태로 인자로 받는 techStack 배열만큼 한번에 저장
 func (s *studyPostTechStackRepo) SaveStudyPostTechStack(studyPostID int64, techStack []string) *errors.RestErr {
 	query := s.insertAllTechStackQuery(studyPostID, techStack)
-	fmt.Println("query: ", query)
+
 	stmt, err := s.db.Prepare(query)
 	if err != nil {
 		return errors.NewInternalServerError("database error" + err.Error())
 	}
 
-	//var tStack []interface{} // stmt.Query에 unpacking 하려면 []interface{}로 바꿔 넣어야함
-	//
-	//for i := 0; i < len(techStack); i++ {
-	//	tStack = append(tStack, techStack[i])
-	//}
-	//fmt.Println("tStack: ", tStack)
-	_, err = stmt.Exec() // TODO: interace 부분때매 걸림
+	_, err = stmt.Exec()
 	if err != nil {
 		return errors.NewInternalServerError("execute error " + err.Error())
 	}
 
-	fmt.Println("why not error?")
 	return nil
 }
 
