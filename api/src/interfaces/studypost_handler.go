@@ -22,33 +22,33 @@ func NewStudyPostHandler(sp application.StudyPostInterface) *StudyPost {
 	}
 }
 
-//func (s *StudyPost) GetPost(w http.ResponseWriter, r *http.Request) {
-//	helpers.SetJsonHeader(w)
-//
-//	postID, restErr := helpers.ExtractUintParam(r, "post_id")
-//	if restErr != nil {
-//		w.WriteHeader(restErr.Status)
-//		w.Write(restErr.ResponseJSON().([]byte))
-//		return
-//	}
-//
-//	studyPost, restErr := s.sp.GetPost(postID)
-//	if restErr != nil {
-//		w.WriteHeader(restErr.Status)
-//		w.Write(restErr.ResponseJSON().([]byte))
-//		return
-//	}
-//
-//	sJson, restErr := studyPost.ResponseJSON()
-//	if restErr != nil {
-//		w.WriteHeader(restErr.Status)
-//		w.Write(restErr.ResponseJSON().([]byte))
-//		return
-//	}
-//
-//	w.WriteHeader(http.StatusOK)
-//	w.Write(sJson)
-//}
+func (s *StudyPost) GetPost(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	studyPostID, restErr := helpers.ExtractIntParam(r, "study_post_id")
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	studyPost, restErr := s.sp.GetPost(studyPostID)
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	sJson, restErr := studyPost.ResponseJSON()
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(sJson)
+}
 
 //func (s *StudyPost) GetPosts(w http.ResponseWriter, r *http.Request) { // TODO: 여기 할 차례
 //	helpers.SetJsonHeader(w)

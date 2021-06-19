@@ -35,6 +35,7 @@ func main() {
 	studyPostApp := application.NewStudyPostApp(services.StudyPost, services.StudyPostTechStack)
 	studyPostHandler := interfaces.NewStudyPostHandler(studyPostApp)
 
+	r.Get("/study_post/{study_post_id}", studyPostHandler.GetPost)
 	r.Post("/study_post", studyPostHandler.SavePost)
 
 	techStackApp := application.NewTechStackApp(services.TechStack)

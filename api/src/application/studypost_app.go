@@ -15,7 +15,7 @@ var _ StudyPostInterface = &studyPostApp{}
 
 type StudyPostInterface interface {
 	SavePost(studyPost *entity.StudyPost) *errors.RestErr
-	//GetPost(id int64) (*entity.StudyPost, *errors.RestErr)
+	GetPost(id int64) (*entity.StudyPost, *errors.RestErr)
 	//GetPostsInLatestOrder(limit, offset int64) (entity.StudyPosts, *errors.RestErr)
 }
 
@@ -41,14 +41,10 @@ func (s *studyPostApp) SavePost(studyPost *entity.StudyPost) *errors.RestErr {
 	return nil
 }
 
-//func (s *studyPostApp) GetPost(id int64) (*entity.StudyPost, *errors.RestErr) {
-//	studyPost, err := s.studyPostRepo.GetPost(id)
-//	if err != nil {
-//	    return nil, err
-//	}
-//	s.studyPostTechStackRepo.
-//
-//}
+func (s *studyPostApp) GetPost(id int64) (*entity.StudyPost, *errors.RestErr) {
+	return s.studyPostRepo.GetPost(id)
+}
+
 //
 //func (s *studyPostApp) GetPostsInLatestOrder(limit, offset uint64) (entity.StudyPosts, *errors.RestErr) {
 //	return s.studyPostRepo.GetPostsInLatestOrder(limit, offset)
