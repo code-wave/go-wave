@@ -27,3 +27,8 @@ func ExtractIntParam(r *http.Request, param string) (int64, *errors.RestErr) {
 	}
 	return value, nil
 }
+
+func ExtractStringParam(r *http.Request, param string) string {
+	value := chi.URLParam(r, param)
+	return value
+}

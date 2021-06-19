@@ -98,3 +98,18 @@ func (t *TechStack) GetAllTechStackByStudyPostID(w http.ResponseWriter, r *http.
 	w.WriteHeader(http.StatusOK)
 	w.Write(tJson)
 }
+
+func (t *TechStack) DeleteTechStack(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	techName := helpers.ExtractStringParam(r, "tech_name")
+
+	err := t.ts.DeleteTechStack(techName)
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

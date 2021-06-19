@@ -87,3 +87,31 @@ func (s *techStackRepo) GetAllTechStackByStudyPostID(studyPostID int64) (entity.
 
 	return techStacks, nil
 }
+
+func (s *techStackRepo) DeleteTechStack(techName string) *errors.RestErr {
+	stmt, err := s.db.Prepare(`
+		DELETE FROM tech_stack
+		WHERE tech_name=$1
+	`)
+	if err != nil {
+		return errors.NewInternalServerError("database error" + err.Error())
+	}
+
+	res, err := stmt.Exec(techName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.NewBadRequestError(err.Error())
+		}
+		return errors.NewInternalServerError("execute error" + err.Error())
+	}
+
+	n, err := res.RowsAffected()
+	if err != nil {
+		return errors.NewInternalServerError("rows affected error" + err.Error())
+	}
+
+	if n == 0 {
+		return errors.NewBadRequestError("no rows to be deleted")
+	}
+	return nil
+}

@@ -43,7 +43,7 @@ func main() {
 	r.Get("/tech_stack/{tech_stack_id}", techStackHandler.GetTechStack)
 	r.Get("/tech_stacks/{study_post_id}", techStackHandler.GetAllTechStackByStudyPostID)
 	r.Post("/tech_stack", techStackHandler.SaveTechStack)
-
+	r.Delete("/tech_stack/tech_name={tech_name}", techStackHandler.DeleteTechStack)
 	//authService, err := persistence.NewRedisDB("127.0.0.1", "6379", "")
 	//if err != nil {
 	//	log.Println(err)
