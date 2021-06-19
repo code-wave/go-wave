@@ -23,17 +23,29 @@ func (t *TechStack) Validate() *errors.RestErr {
 }
 
 func (t *TechStack) ResponseJSON() ([]byte, *errors.RestErr) {
-	tJson, err := json.Marshal(t)
+	m := make(map[string]string)
+
+	m["tech_name"] = t.TechName
+
+	mJson, err := json.Marshal(m)
 	if err != nil {
-		return nil, errors.NewInternalServerError("marshal error" + err.Error())
+		return nil, errors.NewInternalServerError("marshal error: " + err.Error())
 	}
-	return tJson, nil
+
+	return mJson, nil
 }
 
-func (t *TechStacks) ResponseJSON() ([]byte, *errors.RestErr) {
-	tJson, err := json.Marshal(t)
-	if err != nil {
-		return nil, errors.NewInternalServerError("marshal error" + err.Error())
+func (t TechStacks) ResponseJSON() ([]byte, *errors.RestErr) {
+	m := make(map[string][]string)
+
+	for i := 0; i < len(t); i++ {
+		m["tech_stack"] = append(m["tech_stack"], t[i].TechName)
 	}
-	return tJson, nil
+
+	mJson, err := json.Marshal(m)
+	if err != nil {
+		return nil, errors.NewInternalServerError("marshal error: " + err.Error())
+	}
+
+	return mJson, nil
 }
