@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"database/sql"
+	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/domain/repository"
 	"github.com/code-wave/go-wave/infrastructure/errors"
 )
@@ -34,32 +35,55 @@ func (s *techStackRepo) SaveTechStack(techName string) *errors.RestErr {
 	return nil
 }
 
-func (s *techStackRepo) GetTechStackByStudyPostID(studyPostID int64) ([]string, *errors.RestErr) {
+func (s *techStackRepo) GetTechStack(id int64) (*entity.TechStack, *errors.RestErr) {
 	stmt, err := s.db.Prepare(`
-		SELECT tech_name 
-		FROM tech_stack 
+		SELECT tech_name
+		FROM tech_stack
+		WHERE id=$1;
+	`)
+	if err != nil {
+		return nil, errors.NewInternalServerError("database error: " + err.Error())
+	}
+
+	var techStack entity.TechStack
+
+	err = stmt.QueryRow(id).Scan(&techStack.TechName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewBadRequestError(err.Error())
+		}
+		return nil, errors.NewInternalServerError("scan error " + err.Error())
+	}
+
+	return &techStack, nil
+}
+
+func (s *techStackRepo) GetAllTechStackByStudyPostID(studyPostID int64) (entity.TechStacks, *errors.RestErr) {
+	stmt, err := s.db.Prepare(`
+		SELECT tech_name
+		FROM tech_stack
 		WHERE id IN (SELECT tech_stack_id FROM study_post_tech_stack WHERE study_post_id=$1);
 	`)
 	if err != nil {
-		return nil, errors.NewInternalServerError("database error")
+		return nil, errors.NewInternalServerError("database error" + err.Error())
 	}
 
 	rows, err := stmt.Query(studyPostID)
 	if err != nil {
-		return nil, errors.NewInternalServerError("query error")
+		return nil, errors.NewInternalServerError("query error" + err.Error())
 	}
 
-	var techStack []string
+	var techStacks entity.TechStacks
 
 	for rows.Next() {
-		var techName string
-		err := rows.Scan(&techName)
+		var techStack entity.TechStack
+		err := rows.Scan(&techStack.TechName)
 		if err != nil {
-			return nil, errors.NewInternalServerError("scan error")
+			return nil, errors.NewInternalServerError("scan error" + err.Error())
 		}
 
-		techStack = append(techStack, techName)
+		techStacks = append(techStacks, techStack)
 	}
 
-	return techStack, nil
+	return techStacks, nil
 }
