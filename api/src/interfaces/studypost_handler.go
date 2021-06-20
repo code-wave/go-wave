@@ -50,33 +50,40 @@ func (s *StudyPost) GetPost(w http.ResponseWriter, r *http.Request) {
 	w.Write(sJson)
 }
 
-//func (s *StudyPost) GetPosts(w http.ResponseWriter, r *http.Request) { // TODO: 여기 할 차례
-//	helpers.SetJsonHeader(w)
-//
-//	limit, err := helpers.ExtractUintParam(r, "limit")
-//	if err != nil {
-//		http.Error(w, err.Error(), 400)
-//		return
-//	}
-//
-//	offset, err := helpers.ExtractUintParam(r, "offset")
-//	if err != nil {
-//		http.Error(w, err.Error(), 400)
-//		return
-//	}
-//
-//	studyPosts, restErr := s.sp.GetPostsInLatestOrder(limit, offset)
-//	if restErr != nil {
-//		http.Error(w, "error", 500)
-//		return
-//	}
-//
-//	err = json.NewEncoder(w).Encode(&studyPosts)
-//	if err != nil {
-//		http.Error(w, err.Error(), 500)
-//		return
-//	}
-//}
+func (s *StudyPost) GetPostsInLatestOrder(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	limit, err := helpers.ExtractIntParam(r, "limit")
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	offset, err := helpers.ExtractIntParam(r, "offset")
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	studyPosts, err := s.sp.GetPostsInLatestOrder(limit, offset)
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	sJson, err := studyPosts.ResponseJSON()
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(sJson)
+}
 
 func (s *StudyPost) SavePost(w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)

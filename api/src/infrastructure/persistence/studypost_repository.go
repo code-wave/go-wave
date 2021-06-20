@@ -7,7 +7,6 @@ import (
 	"github.com/code-wave/go-wave/infrastructure/errors"
 	"github.com/code-wave/go-wave/infrastructure/helpers"
 	"github.com/lib/pq"
-	//_ "github.com/lib/pq" // TODO: 이거 정확한 차이점?
 )
 
 type studyPostRepo struct {
@@ -81,12 +80,12 @@ func (s *studyPostRepo) GetPostsInLatestOrder(limit, offset int64) (entity.Study
 		LIMIT $1 OFFSET $2;
 	`)
 	if err != nil {
-		return nil, errors.NewInternalServerError("database error")
+		return nil, errors.NewInternalServerError("database error " + err.Error())
 	}
 
 	rows, err := stmt.Query(limit, offset)
 	if err != nil {
-		return nil, errors.NewInternalServerError("database error")
+		return nil, errors.NewInternalServerError("database error " + err.Error())
 	}
 
 	var studyPosts entity.StudyPosts
@@ -94,17 +93,17 @@ func (s *studyPostRepo) GetPostsInLatestOrder(limit, offset int64) (entity.Study
 	for rows.Next() {
 		var studyPost entity.StudyPost
 
-		err := rows.Scan(&studyPost.ID, &studyPost.UserID, &studyPost.Title, &studyPost.Topic, &studyPost.NumOfMembers,
+		err := rows.Scan(&studyPost.ID, &studyPost.UserID, &studyPost.Title, &studyPost.Topic, &studyPost.Content, &studyPost.NumOfMembers,
 			&studyPost.IsMentor, &studyPost.Price, &studyPost.StartDate, &studyPost.EndDate, &studyPost.IsOnline,
-			&studyPost.CreatedAt, &studyPost.UpdatedAt)
+			pq.Array(&studyPost.TechStack), &studyPost.CreatedAt, &studyPost.UpdatedAt)
 		if err != nil {
-			return nil, errors.NewInternalServerError("database error")
+			return nil, errors.NewInternalServerError("database error " + err.Error())
 		}
 		studyPosts = append(studyPosts, studyPost)
 	}
 
 	if err = rows.Err(); err != nil { // 끝난 후에도 에러체크 한번
-		return nil, errors.NewInternalServerError("database error")
+		return nil, errors.NewInternalServerError("database error " + err.Error())
 	}
 
 	return studyPosts, nil

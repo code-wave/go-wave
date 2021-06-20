@@ -73,3 +73,16 @@ func (s *StudyPost) ResponseJSON() ([]byte, *errors.RestErr) {
 
 	return sJson, nil
 }
+
+func (s *StudyPosts) ResponseJSON() ([]byte, *errors.RestErr) {
+	m := make(map[string]StudyPosts)
+	m["study_posts"] = *s
+
+	sJson, err := json.Marshal(m)
+	if err != nil {
+		return nil, errors.NewInternalServerError("marshal error " + err.Error())
+	}
+
+	return sJson, nil
+
+}

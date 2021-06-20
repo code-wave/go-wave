@@ -35,16 +35,17 @@ func main() {
 	studyPostApp := application.NewStudyPostApp(services.StudyPost, services.StudyPostTechStack)
 	studyPostHandler := interfaces.NewStudyPostHandler(studyPostApp)
 
-	r.Get("/study_post/{study_post_id}", studyPostHandler.GetPost)
-	r.Post("/study_post", studyPostHandler.SavePost)
+	r.Get("/study-post/{study_post_id}", studyPostHandler.GetPost)
+	r.Get("/study-posts/limit={limit}&offset={offset}", studyPostHandler.GetPostsInLatestOrder)
+	r.Post("/study-post", studyPostHandler.SavePost)
 
 	techStackApp := application.NewTechStackApp(services.TechStack)
 	techStackHandler := interfaces.NewTechStackHandler(techStackApp)
 
-	r.Get("/tech_stack/{tech_stack_id}", techStackHandler.GetTechStack)
-	r.Get("/tech_stacks/{study_post_id}", techStackHandler.GetAllTechStackByStudyPostID)
-	r.Post("/tech_stack", techStackHandler.SaveTechStack)
-	r.Delete("/tech_stack/tech_name={tech_name}", techStackHandler.DeleteTechStack)
+	r.Get("/tech-stack/{tech_stack_id}", techStackHandler.GetTechStack)
+	r.Get("/tech-stacks/{study_post_id}", techStackHandler.GetAllTechStackByStudyPostID)
+	r.Post("/tech-stack", techStackHandler.SaveTechStack)
+	r.Delete("/tech-stack/tech-name={tech_name}", techStackHandler.DeleteTechStack)
 	//authService, err := persistence.NewRedisDB("127.0.0.1", "6379", "")
 	//if err != nil {
 	//	log.Println(err)
