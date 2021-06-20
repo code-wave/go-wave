@@ -37,6 +37,7 @@ func main() {
 
 	r.Get("/study-post/{study_post_id}", studyPostHandler.GetPost)
 	r.Get("/study-posts/limit={limit}&offset={offset}", studyPostHandler.GetPostsInLatestOrder)
+	r.Get("/study-posts/user_id={user_id}&limit={limit}&offset={offset}", studyPostHandler.GetPostsByUserID)
 	r.Post("/study-post", studyPostHandler.SavePost)
 
 	techStackApp := application.NewTechStackApp(services.TechStack)

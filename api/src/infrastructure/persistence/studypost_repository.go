@@ -109,6 +109,45 @@ func (s *studyPostRepo) GetPostsInLatestOrder(limit, offset int64) (entity.Study
 	return studyPosts, nil
 }
 
+// GetPostsByUserID 특정 user가 쓴 게시글들을 최신순으로 return
+func (s *studyPostRepo) GetPostsByUserID(userID, limit, offset int64) (entity.StudyPosts, *errors.RestErr) {
+	stmt, err := s.db.Prepare(`
+		SELECT *
+		FROM study_post
+		WHERE user_id=$1
+		ORDER BY created_at DESC
+		LIMIT $2 OFFSET $3;
+	`)
+	if err != nil {
+		return nil, errors.NewInternalServerError("database error " + err.Error())
+	}
+
+	rows, err := stmt.Query(userID, limit, offset)
+	if err != nil {
+		return nil, errors.NewInternalServerError("database error " + err.Error())
+	}
+
+	var studyPosts entity.StudyPosts
+
+	for rows.Next() {
+		var studyPost entity.StudyPost
+
+		err := rows.Scan(&studyPost.ID, &studyPost.UserID, &studyPost.Title, &studyPost.Topic, &studyPost.Content, &studyPost.NumOfMembers,
+			&studyPost.IsMentor, &studyPost.Price, &studyPost.StartDate, &studyPost.EndDate, &studyPost.IsOnline,
+			pq.Array(&studyPost.TechStack), &studyPost.CreatedAt, &studyPost.UpdatedAt)
+		if err != nil {
+			return nil, errors.NewInternalServerError("database error " + err.Error())
+		}
+		studyPosts = append(studyPosts, studyPost)
+	}
+
+	if err = rows.Err(); err != nil { // 끝난 후에도 에러체크 한번
+		return nil, errors.NewInternalServerError("database error " + err.Error())
+	}
+
+	return studyPosts, nil
+}
+
 func (s *studyPostRepo) UpdatePost(post *entity.StudyPost) (*entity.StudyPost, *errors.RestErr) {
 	return nil, nil // TODO: 수정
 }

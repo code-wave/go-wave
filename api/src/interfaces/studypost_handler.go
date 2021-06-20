@@ -85,6 +85,48 @@ func (s *StudyPost) GetPostsInLatestOrder(w http.ResponseWriter, r *http.Request
 	w.Write(sJson)
 }
 
+func (s *StudyPost) GetPostsByUserID(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	userID, err := helpers.ExtractIntParam(r, "user_id")
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	limit, err := helpers.ExtractIntParam(r, "limit")
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	offset, err := helpers.ExtractIntParam(r, "offset")
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	studyPosts, err := s.sp.GetPostsByUserID(userID, limit, offset)
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	sJson, err := studyPosts.ResponseJSON()
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(sJson)
+}
+
 func (s *StudyPost) SavePost(w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)
 
