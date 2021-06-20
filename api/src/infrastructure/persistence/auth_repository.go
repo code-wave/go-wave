@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/code-wave/go-wave/domain/entity"
@@ -27,13 +28,9 @@ func NewAuthRepository(rClient *redis.Client) *AuthRepo {
 
 func (ar *AuthRepo) Create(rt *entity.RefreshToken) *errors.RestErr {
 	expUTC := time.Unix(rt.ExpiresAt, 0)
-	// if err := ar.rClient.Set(ctx, rt.Uuid, rt.RefreshToken, time.Until(expUTC)).Err(); err != nil {
-	// 	log.Println("error when save refresh token in redis")
-	// 	redisErr := errors.NewInternalServerError("redis error")
-	// 	return redisErr
-	// }
 
-	if err := ar.rClient.Set(ctx, rt.Uuid, rt.UserID, time.Until(expUTC)).Err(); err != nil {
+	//save redis[rt.Uuid] = (userID-rt)
+	if err := ar.rClient.Set(ctx, rt.Uuid, strconv.FormatUint(rt.UserID, 10)+"-"+rt.RefreshToken, time.Until(expUTC)).Err(); err != nil {
 		log.Println("error when save refresh token in redis")
 		redisErr := errors.NewInternalServerError("redis error")
 		return redisErr
@@ -53,7 +50,7 @@ func (ar *AuthRepo) Delete(uuid string) *errors.RestErr {
 }
 
 func (ar *AuthRepo) Fetch(uuid string) (uint64, *errors.RestErr) {
-	userID, err := ar.rClient.Get(ctx, uuid).Result()
+	userIDAndRt, err := ar.rClient.Get(ctx, uuid).Result()
 	if err != nil {
 		if err == redis.Nil {
 			redisErr := errors.NewUnauthorizedError("unauthorized, refresh token is expired please relogin")
@@ -64,6 +61,11 @@ func (ar *AuthRepo) Fetch(uuid string) (uint64, *errors.RestErr) {
 		return 0, redisErr
 	}
 
+	//split userID + '-' + rt
+	userID := strings.Split(userIDAndRt, "-")[0]
 	uid, _ := strconv.ParseUint(userID, 10, 64)
+	log.Println(userIDAndRt)
+	log.Println(userID)
+	log.Println(uid)
 	return uid, nil
 }

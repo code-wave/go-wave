@@ -32,6 +32,7 @@ func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		restErr := errors.NewBadRequestError("invalid json body")
 		w.WriteHeader(restErr.Status)
 		w.Write(restErr.ResponseJSON().([]byte))
+		return
 	}
 	defer r.Body.Close()
 
@@ -48,6 +49,7 @@ func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rt := result["refresh_token"].(*entity.RefreshToken)
+
 	rtCookie := http.Cookie{
 		Name:     "refresh_uuid",
 		Value:    rt.Uuid,
@@ -65,12 +67,12 @@ func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	//respose payload(user, accessToken)
 	pUser := result["user"].(*entity.User)
 	at := result["access_token"].(*entity.AccessToken)
-	jsonData, jsonErr := json.Marshal(map[string]interface{}{
-		"user":          pUser.PublicUser(),
-		"access_token":  at,
-		"refresh_token": rt,
-	})
 
+	jsonData, jsonErr := json.Marshal(map[string]interface{}{
+		"user":         pUser.PublicUser(),
+		"access_token": at,
+		// "refresh_token": rt,
+	})
 	if jsonErr != nil {
 		jsonErr := errors.NewInternalServerError("internal marshaling error")
 		w.WriteHeader(jsonErr.Status)
@@ -108,6 +110,7 @@ func (ah *AuthHandler) LogoutUser(w http.ResponseWriter, r *http.Request) {
 
 func (ah *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)
+	userID := r.Context().Value(middleware.ContextKeyTokenUserID)
 	refreshUuid, err := r.Cookie("refresh_uuid")
 	if err != nil {
 		restErr := errors.NewBadRequestError("cannot get refresh_uuid from cookie")
@@ -116,7 +119,7 @@ func (ah *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	at, authErr := ah.au.Refresh(refreshUuid.Value)
+	at, authErr := ah.au.Refresh(refreshUuid.Value, userID.(uint64))
 	if authErr != nil {
 		w.WriteHeader(authErr.Status)
 		w.Write(authErr.ResponseJSON().([]byte))
