@@ -36,7 +36,7 @@ func (s *studyPostTechStackRepo) SaveStudyPostTechStack(studyPostID int64, techS
 
 // insertAllTechStackQuery 여러개의 values를 한꺼번에 저장하기 위함
 func (s *studyPostTechStackRepo) insertAllTechStackQuery(studyPostID int64, techStack []string) string { // TODO: 쿼리 만드는 함수
-	query := fmt.Sprintf("INSERT INTO study_post_tech_stack SELECT %d, id FROM tech_stack WHERE tech_name in (", studyPostID)
+	query := fmt.Sprintf("INSERT INTO study_post_tech_stack SELECT %d, id FROM tech_stack WHERE tech_name IN (", studyPostID)
 	for i := 0; i < len(techStack); i++ {
 		query += "'" + techStack[i] + "'"
 		if i < len(techStack)-1 {

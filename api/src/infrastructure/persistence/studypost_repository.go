@@ -152,6 +152,29 @@ func (s *studyPostRepo) UpdatePost(post *entity.StudyPost) (*entity.StudyPost, *
 	return nil, nil // TODO: 수정
 }
 
-func (s *studyPostRepo) DeletePost(post *entity.StudyPost) *errors.RestErr {
+func (s *studyPostRepo) DeletePost(studyPostID int64) *errors.RestErr {
+	stmt, err := s.db.Prepare(`
+		DELETE 
+		FROM study_post
+		WHERE id=$1;
+	`)
+	if err != nil {
+		return errors.NewInternalServerError("database error " + err.Error())
+	}
+
+	res, err := stmt.Exec(studyPostID)
+	if err != nil {
+		return errors.NewInternalServerError("database error " + err.Error())
+	}
+
+	n, err := res.RowsAffected()
+	if err != nil {
+		return errors.NewInternalServerError("database error " + err.Error())
+	}
+
+	if n == 0 {
+		return errors.NewBadRequestError("no rows to be deleted")
+	}
+
 	return nil
 }

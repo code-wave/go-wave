@@ -71,6 +71,27 @@ func (t *TechStack) GetTechStack(w http.ResponseWriter, r *http.Request) {
 	w.Write(tJson)
 }
 
+func (t *TechStack) GetAllTechStack(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	techStacks, err := t.ts.GetAllTechStack()
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	tJson, err := techStacks.ResponseJSON()
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(tJson)
+}
+
 func (t *TechStack) GetAllTechStackByStudyPostID(w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)
 
