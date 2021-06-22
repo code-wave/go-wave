@@ -6,9 +6,10 @@ import (
 )
 
 type StudyPostRepository interface {
-	SavePost(post *entity.StudyPost) (*entity.StudyPost, *errors.RestErr)
-	GetPost(id uint64) (*entity.StudyPost, *errors.RestErr)
-	GetPostsInLatestOrder(limit, offset uint64) (entity.StudyPosts, *errors.RestErr)
-	UpdatePost(post *entity.StudyPost) (*entity.StudyPost, *errors.RestErr)
-	DeletePost(post *entity.StudyPost) *errors.RestErr
+	SavePost(studyPost *entity.StudyPost) (*entity.StudyPost, *errors.RestErr)
+	GetPost(id int64) (*entity.StudyPost, *errors.RestErr)
+	GetPostsInLatestOrder(limit, offset int64) (entity.StudyPosts, *errors.RestErr)
+	GetPostsByUserID(userID, limit, offset int64) (entity.StudyPosts, *errors.RestErr)
+	UpdatePost(studyPost *entity.StudyPost) (*entity.StudyPost, *errors.RestErr)
+	DeletePost(studyPostID int64) *errors.RestErr
 }
