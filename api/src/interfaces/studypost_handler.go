@@ -37,7 +37,7 @@ func (s *StudyPost) SavePost(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("studypost: ", studyPost) // check용 나중에 삭제
 
-	restErr := studyPost.Validate()
+	restErr := studyPost.Validate(r.Method)
 	if restErr != nil {
 		w.WriteHeader(restErr.Status)
 		w.Write(restErr.ResponseJSON().([]byte))
@@ -160,6 +160,44 @@ func (s *StudyPost) GetPostsByUserID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(sJson)
+}
+
+func (s *StudyPost) UpdatePost(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	var studyPost entity.StudyPost
+
+	err := json.NewDecoder(r.Body).Decode(&studyPost)
+	if err != nil {
+		restErr := errors.NewInternalServerError("decode error")
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	restErr := studyPost.Validate(r.Method)
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	updatedPost, restErr := s.sp.UpdatePost(&studyPost)
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	sJson, restErr := updatedPost.ResponseJSON()
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
 		return
 	}
 

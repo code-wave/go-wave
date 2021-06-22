@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/domain/repository"
 	"github.com/code-wave/go-wave/infrastructure/errors"
@@ -148,8 +149,30 @@ func (s *studyPostRepo) GetPostsByUserID(userID, limit, offset int64) (entity.St
 	return studyPosts, nil
 }
 
-func (s *studyPostRepo) UpdatePost(post *entity.StudyPost) (*entity.StudyPost, *errors.RestErr) {
-	return nil, nil // TODO: 수정
+func (s *studyPostRepo) UpdatePost(studyPost *entity.StudyPost) (*entity.StudyPost, *errors.RestErr) {
+	query := s.updatePostQuery(studyPost)
+
+	stmt, err := s.db.Prepare(query)
+	if err != nil {
+		return nil, errors.NewInternalServerError("database error " + err.Error())
+	}
+
+	err = stmt.QueryRow().Scan(&studyPost.ID, &studyPost.Title, &studyPost.Topic, &studyPost.Content, &studyPost.NumOfMembers,
+		&studyPost.IsMentor, &studyPost.Price, &studyPost.StartDate, &studyPost.EndDate, &studyPost.UserID, &studyPost.IsOnline, pq.Array(&studyPost.TechStack), &studyPost.CreatedAt, &studyPost.UpdatedAt)
+	if err != nil {
+		return nil, errors.NewInternalServerError("database error " + err.Error())
+	}
+
+	return studyPost, nil
+}
+
+func (s *studyPostRepo) updatePostQuery(studyPost *entity.StudyPost) string {
+	now := helpers.GetCurrentTimeForDB()
+	query := fmt.Sprintf("UPDATE study_post SET title=%s, topic=%s, content=%s, num_of_members=%s, is_mentor=%s, price=%s, start_date=%s, end_date=%s, is_online=%s, tech_stack=%s, updated_at=%s WHERE id=%d RETURNING *;",
+		studyPost.Title, studyPost.Topic, studyPost.Content, studyPost.NumOfMembers, studyPost.IsMentor, studyPost.Price, studyPost.StartDate,
+		studyPost.EndDate, studyPost.IsOnline, pq.Array(studyPost.TechStack), now, studyPost.ID)
+
+	return query
 }
 
 func (s *studyPostRepo) DeletePost(studyPostID int64) *errors.RestErr {

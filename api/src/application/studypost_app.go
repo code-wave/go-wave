@@ -19,6 +19,7 @@ type StudyPostInterface interface {
 	GetPost(id int64) (*entity.StudyPost, *errors.RestErr)
 	GetPostsInLatestOrder(limit, offset int64) (entity.StudyPosts, *errors.RestErr)
 	GetPostsByUserID(userID, limit, offset int64) (entity.StudyPosts, *errors.RestErr)
+	UpdatePost(studyPost *entity.StudyPost) (*entity.StudyPost, *errors.RestErr)
 	DeletePost(studyPostID int64) *errors.RestErr
 }
 
@@ -60,6 +61,20 @@ func (s *studyPostApp) GetPostsInLatestOrder(limit, offset int64) (entity.StudyP
 
 func (s *studyPostApp) GetPostsByUserID(userID, limit, offset int64) (entity.StudyPosts, *errors.RestErr) {
 	return s.studyPostRepo.GetPostsByUserID(userID, limit, offset)
+}
+
+func (s *studyPostApp) UpdatePost(studyPost *entity.StudyPost) (*entity.StudyPost, *errors.RestErr) {
+	updatedPost, err := s.studyPostRepo.UpdatePost(studyPost)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.studyPostTechStackRepo.UpdateStudyPostTechStack(studyPost.ID, studyPost.TechStack)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedPost, nil
 }
 
 func (s *studyPostApp) DeletePost(studyPostID int64) *errors.RestErr {

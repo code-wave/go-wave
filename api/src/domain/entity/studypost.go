@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/code-wave/go-wave/infrastructure/errors"
 	"github.com/code-wave/go-wave/infrastructure/helpers"
+	"net/http"
 )
 
 type StudyPosts []StudyPost
@@ -25,7 +26,13 @@ type StudyPost struct {
 	UpdatedAt    string   `json:"updated_at"`
 }
 
-func (s *StudyPost) Validate() *errors.RestErr {
+func (s *StudyPost) Validate(method string) *errors.RestErr {
+	if method == http.MethodPatch {
+		if s.ID <= 0 {
+			return errors.NewBadRequestError("id is required")
+		}
+	}
+
 	err := helpers.CheckStringMinChar(s.Title, 5)
 	if err != nil {
 		return errors.NewBadRequestError(err.Error())

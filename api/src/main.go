@@ -39,6 +39,7 @@ func main() {
 	r.Get("/study-posts/limit={limit}&offset={offset}", studyPostHandler.GetPostsInLatestOrder)
 	r.Get("/study-posts/user_id={user_id}&limit={limit}&offset={offset}", studyPostHandler.GetPostsByUserID)
 	r.Post("/study-post", studyPostHandler.SavePost)
+	r.Patch("/study-post", studyPostHandler.UpdatePost)
 	r.Delete("/study-post/{study_post_id}", studyPostHandler.DeletePost)
 
 	techStackApp := application.NewTechStackApp(services.TechStack)
