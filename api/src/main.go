@@ -35,6 +35,7 @@ func main() {
 	//interfaces.NewStudyPost(services.StudyPost)
 
 	r := chi.NewRouter()
+	r.Use(middleware.CORSMiddleware)
 	//users
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
 	r.With(middleware.AuthVerifyMiddleware).Get("/users/{user_id}", userHandler.GetUser)
