@@ -11,12 +11,19 @@ var (
 )
 
 var (
+	RedisHost     = os.Getenv("REDIS_HOST")
+	RedisPort     = os.Getenv("REDIS_PORT")
+	RedisPassword = os.Getenv("REDIS_PASSWORD")
+)
+
+var (
 	AccessTokenKey  = os.Getenv("ACCESS_TOKEN_SECRETE")
 	RefreshTokenKey = os.Getenv("REFRESH_TOKEN_SECRETE")
 	Issuer          = os.Getenv("TOKEN_ISSUER")
 )
 
-func init() {
+//postgres config
+func postgresInit() {
 	// dbDriver := "pgx"
 	host := "127.0.0.1"
 	dbUser := "project"
@@ -39,4 +46,25 @@ func init() {
 	if Port == "" {
 		Port = port
 	}
+}
+
+//redis config
+func redisInit() {
+	host := "127.0.0.1"
+	password := "redis_password"
+	port := "56379"
+
+	if RedisHost == "" {
+		RedisHost = host
+	}
+	if RedisPort == "" {
+		RedisPort = port
+	}
+	if RedisPassword == "" {
+		RedisPassword = password
+	}
+}
+func init() {
+	postgresInit()
+	redisInit()
 }
