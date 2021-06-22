@@ -5,67 +5,20 @@ import (
 	"fmt"
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/domain/entity"
+	"github.com/code-wave/go-wave/infrastructure/errors"
 	"github.com/code-wave/go-wave/infrastructure/helpers"
 	"net/http"
 )
 
 type StudyPost struct {
 	sp application.StudyPostInterface
+	//ts application.StudyPostTechStackInterface
 }
 
-func NewStudyPost(sp application.StudyPostInterface) *StudyPost {
+func NewStudyPostHandler(sp application.StudyPostInterface) *StudyPost {
 	return &StudyPost{
-		sp,
-	}
-}
-
-func (s *StudyPost) GetPost(w http.ResponseWriter, r *http.Request) {
-	helpers.SetJsonHeader(w)
-
-	postID, err := helpers.ExtractUintParam(r, "post_id")
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-
-	studyPost, restErr := s.sp.GetPost(postID)
-	if restErr != nil {
-		http.Error(w, "error", 500) // TODO: 나중에 더 디테일하게
-		return
-	}
-
-	err = json.NewEncoder(w).Encode(&studyPost)
-	if err != nil {
-		http.Error(w, "error", 500)
-		return
-	}
-}
-
-func (s *StudyPost) GetPosts(w http.ResponseWriter, r *http.Request) {
-	helpers.SetJsonHeader(w)
-
-	limit, err := helpers.ExtractUintParam(r, "limit")
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-
-	offset, err := helpers.ExtractUintParam(r, "offset")
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-
-	studyPosts, restErr := s.sp.GetPostsInLatestOrder(limit, offset)
-	if restErr != nil {
-		http.Error(w, "error", 500)
-		return
-	}
-
-	err = json.NewEncoder(w).Encode(&studyPosts)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
+		sp: sp,
+		//ts: ts,
 	}
 }
 
@@ -76,33 +29,198 @@ func (s *StudyPost) SavePost(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&studyPost)
 	if err != nil {
-		http.Error(w, "decode error", 500) // TODO: 에러명 나중에 수정 (아래 에러들도)
+		restErr := errors.NewBadRequestError("invalid json body") // TODO: 에러명 나중에 수정 (아래 에러들도)
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
 	}
 
-	fmt.Println(studyPost) // check용 나중에 삭제
+	fmt.Println("studypost: ", studyPost) // check용 나중에 삭제
 
-	validateErr := studyPost.Validate()
-	if validateErr != nil {
-		jsonData, err := json.Marshal(validateErr)
-		if err != nil {
-			http.Error(w, "marshal error", 500)
-			return
-		}
-
-		_, err = w.Write(jsonData)
-		if err != nil {
-			http.Error(w, "write error", 500)
-			return
-		}
-	}
-
-	newPost, restErr := s.sp.SavePost(&studyPost)
+	restErr := studyPost.Validate(r.Method)
 	if restErr != nil {
-		http.Error(w, "save post error", 500)
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
 	}
 
-	err = json.NewEncoder(w).Encode(&newPost)
-	if err != nil {
-		http.Error(w, "encode error", 500)
+	restErr = s.sp.SavePost(&studyPost)
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
 	}
+
+	sJson, restErr := studyPost.ResponseJSON()
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(sJson)
+}
+
+func (s *StudyPost) GetPost(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	studyPostID, restErr := helpers.ExtractIntParam(r, "study_post_id")
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	studyPost, restErr := s.sp.GetPost(studyPostID)
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	sJson, restErr := studyPost.ResponseJSON()
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(sJson)
+}
+
+func (s *StudyPost) GetPostsInLatestOrder(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	limit, err := helpers.ExtractIntParam(r, "limit")
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	offset, err := helpers.ExtractIntParam(r, "offset")
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	studyPosts, err := s.sp.GetPostsInLatestOrder(limit, offset)
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	sJson, err := studyPosts.ResponseJSON()
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(sJson)
+}
+
+func (s *StudyPost) GetPostsByUserID(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	userID, err := helpers.ExtractIntParam(r, "user_id")
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	limit, err := helpers.ExtractIntParam(r, "limit")
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	offset, err := helpers.ExtractIntParam(r, "offset")
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	studyPosts, err := s.sp.GetPostsByUserID(userID, limit, offset)
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	sJson, err := studyPosts.ResponseJSON()
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(sJson)
+}
+
+func (s *StudyPost) UpdatePost(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	var studyPost entity.StudyPost
+
+	err := json.NewDecoder(r.Body).Decode(&studyPost)
+	if err != nil {
+		restErr := errors.NewInternalServerError("decode error")
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	restErr := studyPost.Validate(r.Method)
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	updatedPost, restErr := s.sp.UpdatePost(&studyPost)
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	sJson, restErr := updatedPost.ResponseJSON()
+	if restErr != nil {
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(sJson)
+}
+
+func (s *StudyPost) DeletePost(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	studyPostID, err := helpers.ExtractIntParam(r, "study_post_id")
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	err = s.sp.DeletePost(studyPostID)
+	if err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

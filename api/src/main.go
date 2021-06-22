@@ -44,11 +44,31 @@ func main() {
 	r.Post("/users/signup", userHandler.SaveUser)
 	r.With(middleware.AuthVerifyMiddleware).Patch("/users/{user_id}", userHandler.UpdateUser)
 	r.With(middleware.AuthVerifyMiddleware).Delete("/users/{user_id}", userHandler.DeleteUser)
-
-	//auth
+  
+  //auth
 	r.Post("/auth/users/login", authHandler.LoginUser)
 	r.With(middleware.AuthVerifyMiddleware).Post("/auth/users/logout", authHandler.LogoutUser)
 	r.With(middleware.AuthVerifyMiddleware).Post("/auth/users/refresh", authHandler.Refresh)
+  
+  
+	studyPostApp := application.NewStudyPostApp(services.StudyPost, services.TechStack, services.StudyPostTechStack)
+	studyPostHandler := interfaces.NewStudyPostHandler(studyPostApp)
+
+	r.Get("/study-post/{study_post_id}", studyPostHandler.GetPost)
+	r.Get("/study-posts/limit={limit}&offset={offset}", studyPostHandler.GetPostsInLatestOrder)
+	r.Get("/study-posts/user_id={user_id}&limit={limit}&offset={offset}", studyPostHandler.GetPostsByUserID)
+	r.Post("/study-post", studyPostHandler.SavePost)
+	r.Patch("/study-post", studyPostHandler.UpdatePost)
+	r.Delete("/study-post/{study_post_id}", studyPostHandler.DeletePost)
+
+	techStackApp := application.NewTechStackApp(services.TechStack)
+	techStackHandler := interfaces.NewTechStackHandler(techStackApp)
+
+	r.Get("/tech-stack/{tech_stack_id}", techStackHandler.GetTechStack)
+	r.Get("/tech-stacks", techStackHandler.GetAllTechStack)
+	r.Get("/tech-stacks/{study_post_id}", techStackHandler.GetAllTechStackByStudyPostID)
+	r.Post("/tech-stack", techStackHandler.SaveTechStack)
+	r.Delete("/tech-stack/tech-name={tech_name}", techStackHandler.DeleteTechStack)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
