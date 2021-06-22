@@ -11,6 +11,7 @@ import (
 	"github.com/code-wave/go-wave/utils/config"
 	"github.com/go-chi/chi/v5"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 	//interfaces.NewStudyPost(services.StudyPost)
 
 	r := chi.NewRouter()
-	r.Use(middleware.CORSMiddleware)
+	// r.Use(middleware.CORSMiddleware)
 	//users
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
 	r.With(middleware.AuthVerifyMiddleware).Get("/users/{user_id}", userHandler.GetUser)
@@ -49,5 +50,13 @@ func main() {
 	r.With(middleware.AuthVerifyMiddleware).Post("/auth/users/logout", authHandler.LogoutUser)
 	r.With(middleware.AuthVerifyMiddleware).Post("/auth/users/refresh", authHandler.Refresh)
 
-	log.Fatal(http.ListenAndServe(":8080", r))
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowCredentials: true,
+		// Enable Debugging for testing, consider disabling in production
+		Debug: true,
+	})
+	handler := cors.Default().Handler(r)
+	handler = c.Handler(handler)
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
