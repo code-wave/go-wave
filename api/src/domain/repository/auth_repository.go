@@ -6,7 +6,7 @@ import (
 )
 
 type AuthRepository interface {
-	Create(rt *entity.RefreshToken) *errors.RestErr
-	Delete()
-	Fetch(uid string) (string, *errors.RestErr)
+	Create(*entity.RefreshToken) *errors.RestErr
+	Delete(string) *errors.RestErr
+	Fetch(string) (uint64, *errors.RestErr)
 }

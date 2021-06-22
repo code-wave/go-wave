@@ -3,6 +3,8 @@ package persistence
 import (
 	"context"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/code-wave/go-wave/domain/entity"
@@ -26,25 +28,44 @@ func NewAuthRepository(rClient *redis.Client) *AuthRepo {
 
 func (ar *AuthRepo) Create(rt *entity.RefreshToken) *errors.RestErr {
 	expUTC := time.Unix(rt.ExpiresAt, 0)
-	if err := ar.rClient.Set(ctx, rt.Uuid, rt.RefreshToken, time.Until(expUTC)).Err(); err != nil {
+
+	//save redis[rt.Uuid] = (userID-rt)
+	if err := ar.rClient.Set(ctx, rt.Uuid, strconv.FormatUint(rt.UserID, 10)+"-"+rt.RefreshToken, time.Until(expUTC)).Err(); err != nil {
 		log.Println("error when save refresh token in redis")
 		redisErr := errors.NewInternalServerError("redis error")
 		return redisErr
 	}
-
 	return nil
 }
-func (ar *AuthRepo) Delete() {}
-func (ar *AuthRepo) Fetch(uuid string) (string, *errors.RestErr) {
-	rtRedis, err := ar.rClient.Get(ctx, uuid).Result()
+
+func (ar *AuthRepo) Delete(uuid string) *errors.RestErr {
+	deleted, err := ar.rClient.Del(ctx, uuid).Result()
+	//del success, then return 1
+	if err != nil || deleted != 1 {
+		log.Println("error when delete refresh token in redis")
+		redisErr := errors.NewUnauthorizedError("unauthorized, refresh token is not valid")
+		return redisErr
+	}
+	return nil
+}
+
+func (ar *AuthRepo) Fetch(uuid string) (uint64, *errors.RestErr) {
+	userIDAndRt, err := ar.rClient.Get(ctx, uuid).Result()
 	if err != nil {
 		if err == redis.Nil {
-			redisErr := errors.NewNotFoundError("not found value")
-			return "", redisErr
+			redisErr := errors.NewUnauthorizedError("unauthorized, refresh token is expired please relogin")
+			return 0, redisErr
 		}
-		redisErr := errors.NewUnauthorizedError("refresh token is not valid")
+		redisErr := errors.NewUnauthorizedError("unauthorized, refresh token is expired please relogin")
 		log.Println("error when get refresh token in redis, ", err)
-		return "", redisErr
+		return 0, redisErr
 	}
-	return rtRedis, nil
+
+	//split userID + '-' + rt
+	userID := strings.Split(userIDAndRt, "-")[0]
+	uid, _ := strconv.ParseUint(userID, 10, 64)
+	log.Println(userIDAndRt)
+	log.Println(userID)
+	log.Println(uid)
+	return uid, nil
 }

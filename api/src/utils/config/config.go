@@ -2,6 +2,7 @@ package config
 
 import "os"
 
+//postgres env
 var (
 	Host       = os.Getenv("POSTGRES_HOST")
 	DBUser     = os.Getenv("POSTGRES_USER")
@@ -10,12 +11,14 @@ var (
 	Port       = os.Getenv("POSTGRES_PORT")
 )
 
+//redis env
 var (
 	RedisHost     = os.Getenv("REDIS_HOST")
 	RedisPort     = os.Getenv("REDIS_PORT")
 	RedisPassword = os.Getenv("REDIS_PASSWORD")
 )
 
+//token secret env
 var (
 	AccessTokenKey  = os.Getenv("ACCESS_TOKEN_SECRETE")
 	RefreshTokenKey = os.Getenv("REFRESH_TOKEN_SECRETE")
@@ -64,6 +67,7 @@ func redisInit() {
 		RedisPassword = password
 	}
 }
+
 func init() {
 	postgresInit()
 	redisInit()

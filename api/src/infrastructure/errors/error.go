@@ -47,7 +47,7 @@ func NewInternalServerError(message string) *RestErr {
 func NewForbiddenError(message string) *RestErr {
 	return &RestErr{
 		Message: message,
-		Status:  http.StatusNotFound,
+		Status:  http.StatusForbidden,
 		Error:   "forbidden_request",
 	}
 }
