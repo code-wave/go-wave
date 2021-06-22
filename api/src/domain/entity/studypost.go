@@ -73,7 +73,9 @@ func (s *StudyPost) Validate(method string) *errors.RestErr {
 }
 
 func (s *StudyPost) ResponseJSON() ([]byte, *errors.RestErr) {
-	sJson, err := json.Marshal(s)
+	m := make(map[string]StudyPost)
+	m["study_post"] = *s
+	sJson, err := json.Marshal(m)
 	if err != nil {
 		return nil, errors.NewInternalServerError("marshal error")
 	}
