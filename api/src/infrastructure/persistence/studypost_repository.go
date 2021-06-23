@@ -149,22 +149,41 @@ func (s *studyPostRepo) GetPostsByUserID(userID, limit, offset int64) (entity.St
 }
 
 func (s *studyPostRepo) UpdatePost(studyPost *entity.StudyPost) (*entity.StudyPost, *errors.RestErr) {
-	stmt, err := s.db.Prepare(`
+	tx, err := s.db.Begin()
+
+	stmt, err := tx.Prepare(`
 		UPDATE study_post
 		SET title=$1, topic=$2, content=$3, num_of_members=$4, is_mentor=$5, price=$6,
 		    start_date=$7, end_date=$8, is_online=$9, tech_stack=$10, updated_at=$11
 		WHERE id=$12
 		RETURNING *;
 	`)
+	//stmt, err := s.db.Prepare(`
+	//	UPDATE study_post
+	//	SET title=$1, topic=$2, content=$3, num_of_members=$4, is_mentor=$5, price=$6,
+	//	    start_date=$7, end_date=$8, is_online=$9, tech_stack=$10, updated_at=$11
+	//	WHERE id=$12
+	//	RETURNING *;
+	//`)
 	if err != nil {
 		return nil, errors.NewInternalServerError("database error " + err.Error())
 	}
 
 	now := helpers.GetCurrentTimeForDB()
-	err = stmt.QueryRow(studyPost.Title, studyPost.Topic, studyPost.Content, studyPost.NumOfMembers, studyPost.IsMentor, studyPost.Price, studyPost.StartDate,
-		studyPost.EndDate, studyPost.IsOnline, pq.Array(studyPost.TechStack), now, studyPost.ID).Scan(&studyPost.ID, &studyPost.UserID, &studyPost.Title, &studyPost.Topic, &studyPost.Content, &studyPost.NumOfMembers,
+	row := stmt.QueryRow(studyPost.Title, studyPost.Topic, studyPost.Content, studyPost.NumOfMembers, studyPost.IsMentor, studyPost.Price, studyPost.StartDate,
+		studyPost.EndDate, studyPost.IsOnline, pq.Array(studyPost.TechStack), now, studyPost.ID)
+	err = row.Err()
+	if err != nil {
+		return nil, errors.NewInternalServerError("query row error " + err.Error())
+	}
+
+	err = row.Scan(&studyPost.ID, &studyPost.UserID, &studyPost.Title, &studyPost.Topic, &studyPost.Content, &studyPost.NumOfMembers,
 		&studyPost.IsMentor, &studyPost.Price, &studyPost.StartDate, &studyPost.EndDate, &studyPost.IsOnline, pq.Array(&studyPost.TechStack), &studyPost.CreatedAt, &studyPost.UpdatedAt)
 	if err != nil {
+		rErr := tx.Rollback() // 에러시 rollback
+		if rErr != nil {
+			return nil, errors.NewInternalServerError("rollback error " + err.Error())
+		}
 		return nil, errors.NewInternalServerError("database update error " + err.Error())
 	}
 
