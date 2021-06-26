@@ -6,9 +6,9 @@ import (
 	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/domain/repository"
 	"github.com/code-wave/go-wave/infrastructure/auth"
-	"github.com/code-wave/go-wave/infrastructure/date"
 	"github.com/code-wave/go-wave/infrastructure/encryption"
 	"github.com/code-wave/go-wave/infrastructure/errors"
+	"github.com/code-wave/go-wave/infrastructure/helpers"
 )
 
 var _ UserAppInterface = &UserApp{}
@@ -66,7 +66,7 @@ func (ua *UserApp) GetAllUsers(limit, offset int64) (entity.Users, *errors.RestE
 
 func (ua *UserApp) UpdateUser(user entity.User) (*entity.User, *errors.RestErr) {
 	user.UpdatedAt.Valid = true
-	user.UpdatedAt.String = date.GetDateString(time.Now())
+	user.UpdatedAt.String = helpers.GetDateString(time.Now())
 	user.Password, _ = encryption.Hash(user.Password)
 
 	if err := ua.ur.Update(&user); err != nil {

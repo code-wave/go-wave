@@ -28,29 +28,27 @@ func main() {
 		return
 	}
 
+	r := chi.NewRouter()
+	//users
 	userApp := application.NewUserApp(services.User)
 	userHandler := interfaces.NewUserHandler(userApp)
 
-	authApp := application.NewAuthApp(redisService.Auth)
-	authHandler := interfaces.NewAuthHandler(userApp, authApp)
-	//interfaces.NewStudyPost(services.StudyPost)
-
-	r := chi.NewRouter()
-	// r.Use(middleware.CORSMiddleware)
-	//users
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
-	r.With(middleware.AuthVerifyMiddleware).Get("/users/{user_id}", userHandler.GetUser)
+	r.Get("/users/{user_id}", userHandler.GetUser)
 	r.Get("/users/limit={limit}&offset={offset}", userHandler.GetAllUsers)
 	r.Post("/users/signup", userHandler.SaveUser)
 	r.With(middleware.AuthVerifyMiddleware).Patch("/users/{user_id}", userHandler.UpdateUser)
 	r.With(middleware.AuthVerifyMiddleware).Delete("/users/{user_id}", userHandler.DeleteUser)
-  
-  //auth
+
+	//auth
+	authApp := application.NewAuthApp(redisService.Auth)
+	authHandler := interfaces.NewAuthHandler(userApp, authApp)
+
 	r.Post("/auth/users/login", authHandler.LoginUser)
 	r.With(middleware.AuthVerifyMiddleware).Post("/auth/users/logout", authHandler.LogoutUser)
 	r.With(middleware.AuthVerifyMiddleware).Post("/auth/users/refresh", authHandler.Refresh)
-  
-  
+
+	//studyPost
 	studyPostApp := application.NewStudyPostApp(services.StudyPost, services.TechStack, services.StudyPostTechStack)
 	studyPostHandler := interfaces.NewStudyPostHandler(studyPostApp)
 
@@ -61,6 +59,7 @@ func main() {
 	r.Patch("/study-post", studyPostHandler.UpdatePost)
 	r.Delete("/study-post/{study_post_id}", studyPostHandler.DeletePost)
 
+	//techStack
 	techStackApp := application.NewTechStackApp(services.TechStack)
 	techStackHandler := interfaces.NewTechStackHandler(techStackApp)
 
@@ -70,6 +69,7 @@ func main() {
 	r.Post("/tech-stack", techStackHandler.SaveTechStack)
 	r.Delete("/tech-stack/tech-name={tech_name}", techStackHandler.DeleteTechStack)
 
+	//cors option
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
@@ -78,5 +78,6 @@ func main() {
 	})
 	handler := cors.Default().Handler(r)
 	handler = c.Handler(handler)
+
 	log.Fatal(http.ListenAndServe(":8080", handler))
 }

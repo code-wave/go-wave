@@ -13,7 +13,6 @@ services:
             REDIS_PASSWORD: redis_password
         restart: always
 
-
     postgres:
         image: postgres:13.2
         ports:
