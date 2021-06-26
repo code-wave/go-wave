@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/infrastructure/errors"
-	"github.com/go-chi/chi/v5"
+	"github.com/code-wave/go-wave/infrastructure/helpers"
 )
 
 type UserHandler struct {
@@ -22,25 +21,11 @@ func NewUserHandler(ua application.UserAppInterface) *UserHandler {
 	}
 }
 
-func getUserID(r *http.Request, param string) (uint64, *errors.RestErr) {
-	userID, err := strconv.ParseUint(chi.URLParam(r, param), 10, 64)
-	if err != nil {
-		return 0, errors.NewBadRequestError("user_id param is invalid")
-	}
-	return userID, nil
-}
-
-func getQueryParam(r *http.Request, param string) (int64, *errors.RestErr) {
-	value, err := strconv.ParseInt(chi.URLParam(r, param), 10, 64)
-	if err != nil {
-		return 0, errors.NewBadRequestError("invalid query param")
-	}
-	return value, nil
-}
-
 func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	userID, err := getUserID(r, "user_id")
+	helpers.SetJsonHeader(w)
+
+	userID, err := helpers.ExtractUintParam(r, "user_id")
+
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
@@ -59,14 +44,16 @@ func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	limit, err := getQueryParam(r, "limit")
+	helpers.SetJsonHeader(w)
+
+	limit, err := helpers.ExtractIntParam(r, "limit")
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
 		return
 	}
-	offset, err := getQueryParam(r, "offset")
+
+	offset, err := helpers.ExtractIntParam(r, "offset")
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
@@ -86,7 +73,8 @@ func (uh *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) SaveUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	helpers.SetJsonHeader(w)
+
 	var u entity.User
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		restErr := errors.NewBadRequestError("invalid json body")
@@ -107,8 +95,8 @@ func (uh *UserHandler) SaveUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	userID, err := getUserID(r, "user_id")
+	helpers.SetJsonHeader(w)
+	userID, err := helpers.ExtractUintParam(r, "user_id")
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
@@ -137,8 +125,9 @@ func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	userID, err := getUserID(r, "user_id")
+	helpers.SetJsonHeader(w)
+
+	userID, err := helpers.ExtractUintParam(r, "user_id")
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
@@ -150,7 +139,7 @@ func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, _ := json.Marshal(map[string]string{"result": "success"})
+	// result, _ := json.Marshal(map[string]string{"result": "success"})
 	w.WriteHeader(http.StatusOK)
-	w.Write(result)
+	w.Write([]byte("\"result\": \"success\""))
 }

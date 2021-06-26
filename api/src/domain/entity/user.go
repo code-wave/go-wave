@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/code-wave/go-wave/infrastructure/date"
 	"github.com/code-wave/go-wave/infrastructure/encryption"
 	"github.com/code-wave/go-wave/infrastructure/errors"
+	"github.com/code-wave/go-wave/infrastructure/helpers"
 )
 
 type Users []User
@@ -57,7 +57,7 @@ func (user *User) Validate() *errors.RestErr {
 
 func (u *User) BeforeSave() *errors.RestErr {
 	u.Password, _ = encryption.Hash(u.Password)
-	u.CreatedAt = date.GetDateString(time.Now())
+	u.CreatedAt = helpers.GetDateString(time.Now())
 
 	return nil
 }

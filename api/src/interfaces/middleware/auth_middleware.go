@@ -19,7 +19,7 @@ func AuthVerifyMiddleware(next http.Handler) http.Handler {
 		helpers.SetJsonHeader(w)
 		bearerToken := r.Header.Get("Authorization")
 		if bearerToken == "" {
-			err := errors.NewForbiddenError("no Authorization header provided")
+			err := errors.NewUnauthorizedError("no Authorization header provided")
 			w.WriteHeader(err.Status)
 			w.Write(err.ResponseJSON().([]byte))
 			return
@@ -27,7 +27,7 @@ func AuthVerifyMiddleware(next http.Handler) http.Handler {
 
 		clientToken := auth.ExtractToken(bearerToken)
 		if clientToken == "" {
-			err := errors.NewBadRequestError("invalid format of authorization header")
+			err := errors.NewUnauthorizedError("invalid format of authorization header")
 			w.WriteHeader(err.Status)
 			w.Write(err.ResponseJSON().([]byte))
 			return
