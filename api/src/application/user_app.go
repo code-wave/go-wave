@@ -19,10 +19,11 @@ type UserApp struct {
 
 type UserAppInterface interface {
 	SaveUser(entity.User) (*entity.User, *errors.RestErr)
-	GetUser(uint64) (*entity.User, *errors.RestErr)
+	GetUser(int64) (*entity.User, *errors.RestErr)
+	GetUserByID(int64) (*entity.User, *errors.RestErr)
 	GetAllUsers(int64, int64) (entity.Users, *errors.RestErr)
 	UpdateUser(entity.User) (*entity.User, *errors.RestErr)
-	DeleteUser(uint64) *errors.RestErr
+	DeleteUser(int64) *errors.RestErr
 	LoginUser(entity.User) (map[string]interface{}, *errors.RestErr)
 }
 
@@ -48,7 +49,7 @@ func (ua *UserApp) SaveUser(user entity.User) (*entity.User, *errors.RestErr) {
 	return &user, nil
 }
 
-func (ua *UserApp) GetUser(userID uint64) (*entity.User, *errors.RestErr) {
+func (ua *UserApp) GetUser(userID int64) (*entity.User, *errors.RestErr) {
 	user := &entity.User{
 		ID: userID,
 	}
@@ -58,6 +59,10 @@ func (ua *UserApp) GetUser(userID uint64) (*entity.User, *errors.RestErr) {
 	}
 
 	return user, nil
+}
+
+func (ua *UserApp) GetUserByID(userID int64) (*entity.User, *errors.RestErr) {
+	return ua.ur.GetUserByID(userID)
 }
 
 func (ua *UserApp) GetAllUsers(limit, offset int64) (entity.Users, *errors.RestErr) {
@@ -76,7 +81,7 @@ func (ua *UserApp) UpdateUser(user entity.User) (*entity.User, *errors.RestErr) 
 	return &user, nil
 }
 
-func (ua *UserApp) DeleteUser(userID uint64) *errors.RestErr {
+func (ua *UserApp) DeleteUser(userID int64) *errors.RestErr {
 	return ua.ur.Delete(userID)
 }
 

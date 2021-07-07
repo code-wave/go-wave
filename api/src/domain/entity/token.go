@@ -5,7 +5,7 @@ import "encoding/json"
 type RefreshToken struct {
 	Uuid         string `json:"uuid"`
 	RefreshToken string `json:"refresh_token"`
-	UserID       uint64 `json:"user_id"`
+	UserID       int64  `json:"user_id"`
 	ExpiresAt    int64  `json:"expires_at"`
 }
 

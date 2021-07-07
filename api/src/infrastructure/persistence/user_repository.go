@@ -51,6 +51,25 @@ func (r *UserRepo) Save(user *entity.User) *errors.RestErr {
 	return nil
 }
 
+func (r *UserRepo) GetUserByID(userID int64) (*entity.User, *errors.RestErr) {
+	stmt, err := r.db.Prepare(queryGetUserByID)
+	if err != nil {
+		log.Println("error when trying to prepare to get user by id, ", err)
+		return nil, errors.NewInternalServerError("database error")
+	}
+	defer stmt.Close()
+
+	user := entity.User{
+		ID: userID,
+	}
+
+	if err = stmt.QueryRow(user.ID).Scan(&user.ID, &user.Email, &user.Name, &user.Nickname, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		log.Println("error when trying to scan after get user by id, ", err)
+		return nil, errors.NewInternalServerError("database error")
+	}
+	return &user, nil
+}
+
 func (r *UserRepo) Get(user *entity.User) *errors.RestErr {
 	stmt, err := r.db.Prepare(queryGetUserByID)
 	if err != nil {
@@ -116,7 +135,7 @@ func (r *UserRepo) Update(user *entity.User) *errors.RestErr {
 	return nil
 }
 
-func (r *UserRepo) Delete(userID uint64) *errors.RestErr {
+func (r *UserRepo) Delete(userID int64) *errors.RestErr {
 	stmt, err := r.db.Prepare(queryDeleteUser)
 	if err != nil {
 		log.Println("error when trying to prepare to delete user, ", err)

@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"database/sql"
+
 	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/domain/repository"
 	"github.com/code-wave/go-wave/infrastructure/errors"
@@ -150,7 +151,9 @@ func (s *studyPostRepo) GetPostsByUserID(userID, limit, offset int64) (entity.St
 
 func (s *studyPostRepo) UpdatePost(studyPost *entity.StudyPost) (*entity.StudyPost, *errors.RestErr) {
 	tx, err := s.db.Begin()
-
+	if err != nil {
+		return nil, errors.NewInternalServerError("database error " + err.Error())
+	}
 	stmt, err := tx.Prepare(`
 		UPDATE study_post
 		SET title=$1, topic=$2, content=$3, num_of_members=$4, is_mentor=$5, price=$6,

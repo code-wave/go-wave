@@ -16,8 +16,8 @@ type AuthApp struct {
 type AuthAppInterface interface {
 	CreateAuth(*entity.RefreshToken) *errors.RestErr
 	DeleteAuth(string) *errors.RestErr
-	FetchAuth(string) (uint64, *errors.RestErr)
-	Refresh(string, uint64) (*entity.AccessToken, *errors.RestErr)
+	FetchAuth(string) (int64, *errors.RestErr)
+	Refresh(string, int64) (*entity.AccessToken, *errors.RestErr)
 }
 
 func NewAuthApp(ar repository.AuthRepository) *AuthApp {
@@ -34,11 +34,11 @@ func (au *AuthApp) DeleteAuth(uuid string) *errors.RestErr {
 	return au.ar.Delete(uuid)
 }
 
-func (au *AuthApp) FetchAuth(uuid string) (uint64, *errors.RestErr) {
+func (au *AuthApp) FetchAuth(uuid string) (int64, *errors.RestErr) {
 	return au.ar.Fetch(uuid)
 }
 
-func (au *AuthApp) Refresh(uuid string, uid uint64) (*entity.AccessToken, *errors.RestErr) {
+func (au *AuthApp) Refresh(uuid string, uid int64) (*entity.AccessToken, *errors.RestErr) {
 	userID, err := au.ar.Fetch(uuid)
 	if err != nil {
 		return nil, err

@@ -3,9 +3,10 @@ package persistence
 import (
 	"database/sql"
 	"fmt"
-	"github.com/code-wave/go-wave/domain/repository"
 	"log"
 	"time"
+
+	"github.com/code-wave/go-wave/domain/repository"
 )
 
 const maxOpenDBConn = 10
@@ -18,6 +19,7 @@ type Repositories struct {
 	User               repository.UserRepository
 	TechStack          repository.TechStackRepository
 	StudyPostTechStack repository.StudyPostTechStackRepository
+	Chat               repository.ChatRepository
 }
 
 func NewRepositories(driver, host, port, dbUser, password, dbName string) (*Repositories, error) {
@@ -48,6 +50,7 @@ func NewRepositories(driver, host, port, dbUser, password, dbName string) (*Repo
 		User:               NewUserRepository(db),
 		TechStack:          NewTechStackRepo(db),
 		StudyPostTechStack: NewStudyPostTechStackRepo(db),
+		Chat:               NewChatRepo(db),
 	}, nil
 }
 
