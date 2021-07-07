@@ -24,7 +24,7 @@ func NewUserHandler(ua application.UserAppInterface) *UserHandler {
 func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)
 
-	userID, err := helpers.ExtractUintParam(r, "user_id")
+	userID, err := helpers.ExtractIntParam(r, "user_id")
 
 	if err != nil {
 		w.WriteHeader(err.Status)
@@ -96,7 +96,7 @@ func (uh *UserHandler) SaveUser(w http.ResponseWriter, r *http.Request) {
 
 func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)
-	userID, err := helpers.ExtractUintParam(r, "user_id")
+	userID, err := helpers.ExtractIntParam(r, "user_id")
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
@@ -127,7 +127,7 @@ func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)
 
-	userID, err := helpers.ExtractUintParam(r, "user_id")
+	userID, err := helpers.ExtractIntParam(r, "user_id")
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))

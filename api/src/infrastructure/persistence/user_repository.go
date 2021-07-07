@@ -116,7 +116,7 @@ func (r *UserRepo) Update(user *entity.User) *errors.RestErr {
 	return nil
 }
 
-func (r *UserRepo) Delete(userID uint64) *errors.RestErr {
+func (r *UserRepo) Delete(userID int64) *errors.RestErr {
 	stmt, err := r.db.Prepare(queryDeleteUser)
 	if err != nil {
 		log.Println("error when trying to prepare to delete user, ", err)
