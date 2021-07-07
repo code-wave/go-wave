@@ -48,13 +48,23 @@ func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//respose payload(user, accessToken, refreshToken)
+	pUser := result["user"].(*entity.User)
+	at := result["access_token"].(*entity.AccessToken)
 	rt := result["refresh_token"].(*entity.RefreshToken)
+
+	atCookie := http.Cookie{
+		Name:     "access_token",
+		Value:    at.AccessToken,
+		HttpOnly: true,
+	}
 
 	rtCookie := http.Cookie{
 		Name:     "refresh_uuid",
 		Value:    rt.Uuid,
 		HttpOnly: true,
 	}
+	http.SetCookie(w, &atCookie)
 	http.SetCookie(w, &rtCookie)
 
 	//save result["refreshToken"] to redis metadata
@@ -63,10 +73,6 @@ func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		w.Write(authErr.ResponseJSON().([]byte))
 		return
 	}
-
-	//respose payload(user, accessToken)
-	pUser := result["user"].(*entity.User)
-	at := result["access_token"].(*entity.AccessToken)
 
 	jsonData, jsonErr := json.Marshal(map[string]interface{}{
 		"user":         pUser.PublicUser(),
