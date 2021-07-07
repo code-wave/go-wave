@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+const ErrNoRows = "no_rows_error"
+
 type RestErr struct {
 	Message string `json:"message"`
 	Status  int    `json:"status"`
@@ -58,6 +60,14 @@ func NewUnauthorizedError(message string) *RestErr {
 		Message: message,
 		Status:  http.StatusNotFound,
 		Error:   "unauthorized",
+	}
+}
+
+func NewNoRowsError() *RestErr {
+	return &RestErr{
+		Message: ErrNoRows,
+		Status:  http.StatusOK,
+		Error:   ErrNoRows,
 	}
 }
 

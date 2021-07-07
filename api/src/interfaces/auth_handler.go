@@ -125,7 +125,7 @@ func (ah *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	at, authErr := ah.au.Refresh(refreshUuid.Value, userID.(uint64))
+	at, authErr := ah.au.Refresh(refreshUuid.Value, userID.(int64))
 	if authErr != nil {
 		w.WriteHeader(authErr.Status)
 		w.Write(authErr.ResponseJSON().([]byte))

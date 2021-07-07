@@ -14,19 +14,13 @@ import (
 type Users []User
 
 type User struct {
-	ID        uint64         `json:"id"`
+	ID        int64          `json:"id"`
 	Email     string         `json:"email"`
 	Password  string         `json:"password"`
 	Name      string         `json:"name"`
 	Nickname  string         `json:"nickname"`
 	CreatedAt string         `json:"created_at"`
 	UpdatedAt sql.NullString `json:"updated_at"`
-}
-
-type PublicUser struct {
-	ID       uint64 `json:"id"`
-	Name     string `json:"name"`
-	Nickname string `json:"nickname"`
 }
 
 type LoginRequest struct {
