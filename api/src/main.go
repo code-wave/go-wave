@@ -40,6 +40,12 @@ func main() {
 	r.With(middleware.AuthVerifyMiddleware).Patch("/users/{user_id}", userHandler.UpdateUser)
 	r.With(middleware.AuthVerifyMiddleware).Delete("/users/{user_id}", userHandler.DeleteUser)
 
+	//mypage
+	mypageApp := application.NewMypageApp(services.User, services.StudyPost)
+	mypageHandler := interfaces.NewMyPageHandler(mypageApp)
+	r.Get("/users/mypage/{user_id}/limit={limit}&offset={offset}", mypageHandler.GetMypage)
+	r.With(middleware.AuthVerifyMiddleware).Get("/auth/users/mypage/{user_id}/limit={limit}&offset={offset}", mypageHandler.GetMypage)
+
 	//auth
 	authApp := application.NewAuthApp(redisService.Auth)
 	authHandler := interfaces.NewAuthHandler(userApp, authApp)
