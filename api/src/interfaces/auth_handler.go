@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/code-wave/go-wave/infrastructure/helpers"
 
@@ -23,6 +24,28 @@ func NewAuthHandler(ua application.UserAppInterface, au application.AuthAppInter
 		ua: ua,
 		au: au,
 	}
+}
+
+//Create valid code, send code to user and store in redis
+func (ah *AuthHandler) CreateValidCode(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	var v entity.ValidEmail
+	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
+		restErr := errors.NewBadRequestError("invalid json body " + err.Error())
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	if err := ah.au.CreateValidCode(&v); err != nil {
+		w.WriteHeader(err.Status)
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(strconv.FormatInt(v.ValidCode, 10)))
 }
 
 func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {

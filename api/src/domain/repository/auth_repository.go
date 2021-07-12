@@ -6,6 +6,8 @@ import (
 )
 
 type AuthRepository interface {
+	FetchValidCode(*entity.ValidEmail) *errors.RestErr
+	CreateValidCode(*entity.ValidEmail) *errors.RestErr
 	Create(*entity.RefreshToken) *errors.RestErr
 	Delete(string) *errors.RestErr
 	Fetch(string) (int64, *errors.RestErr)

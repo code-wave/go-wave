@@ -15,6 +15,6 @@ type AccessToken struct {
 }
 
 func (at *AccessToken) ResponseJSON() interface{} {
-	aJson, _ := json.Marshal(at)
-	return aJson
+	atJson, _ := json.Marshal(at)
+	return atJson
 }

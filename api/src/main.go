@@ -51,6 +51,7 @@ func main() {
 	authHandler := interfaces.NewAuthHandler(userApp, authApp)
 
 	r.Post("/auth/users/login", authHandler.LoginUser)
+	r.Post("/valid-mail/send", authHandler.CreateValidCode)
 	r.With(middleware.AuthVerifyMiddleware).Post("/auth/users/logout", authHandler.LogoutUser)
 	r.With(middleware.AuthVerifyMiddleware).Post("/auth/users/refresh", authHandler.Refresh)
 

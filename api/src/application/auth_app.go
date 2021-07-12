@@ -2,6 +2,8 @@ package application
 
 import (
 	"log"
+	"math/rand"
+	"time"
 
 	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/domain/repository"
@@ -14,6 +16,8 @@ type AuthApp struct {
 }
 
 type AuthAppInterface interface {
+	FetchValidCode(*entity.ValidEmail) *errors.RestErr
+	CreateValidCode(*entity.ValidEmail) *errors.RestErr
 	CreateAuth(*entity.RefreshToken) *errors.RestErr
 	DeleteAuth(string) *errors.RestErr
 	FetchAuth(string) (int64, *errors.RestErr)
@@ -24,6 +28,19 @@ func NewAuthApp(ar repository.AuthRepository) *AuthApp {
 	return &AuthApp{
 		ar: ar,
 	}
+}
+
+func (au *AuthApp) FetchValidCode(validEmail *entity.ValidEmail) *errors.RestErr {
+	return au.ar.FetchValidCode(validEmail)
+}
+
+func (au *AuthApp) CreateValidCode(validEmail *entity.ValidEmail) *errors.RestErr {
+	rand.Seed(time.Now().UnixNano())
+	randomCode := 1000 + rand.Int63n(9999)
+	validEmail.ValidCode = randomCode
+	//Send validCode to user email
+	validEmail.SendValidCode()
+	return au.ar.CreateValidCode(validEmail)
 }
 
 func (au *AuthApp) CreateAuth(rt *entity.RefreshToken) *errors.RestErr {
