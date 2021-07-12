@@ -26,12 +26,27 @@ func NewMypageApp(userRepo repository.UserRepository, studyPostRepo repository.S
 	}
 }
 
+func getStudyPostForMypage(mypagePost entity.MypagePost, studyPost entity.StudyPost, writer string) entity.MypagePost {
+	mypagePost.Writer = writer
+	mypagePost.Title = studyPost.Title
+	mypagePost.CreatedAt = studyPost.CreatedAt
+
+	return mypagePost
+}
+
 func (m *mypageApp) GetMypageByUserIDAndStudyPostID(userID, limit, offset int64) (*entity.Mypage, *errors.RestErr) {
 	var mypage entity.Mypage
+
 	user, userErr := m.userRepo.GetUserByID(userID)
 	if userErr != nil {
 		log.Println("get user by id error at get my page application " + userErr.Message)
 		return nil, userErr
+	}
+	//Get mypage user info
+	mypage.User = entity.PublicUser{
+		ID:       user.ID,
+		Name:     user.Name,
+		Nickname: user.Nickname,
 	}
 
 	studyPosts, studyPostErr := m.studyPostRepo.GetPostsByUserID(userID, limit, offset)
@@ -40,22 +55,34 @@ func (m *mypageApp) GetMypageByUserIDAndStudyPostID(userID, limit, offset int64)
 		return nil, studyPostErr
 	}
 
-	mypage.User = entity.PublicUser{
-		ID:       user.ID,
-		Name:     user.Name,
-		Nickname: user.Nickname,
-	}
-
-	var mypagePosts []entity.MypagePost
+	//Get stduyPosts list about writed
+	var writedPosts []entity.MypagePost
 	for _, studyPost := range studyPosts {
-		var mypage entity.MypagePost
-		mypage.Title = studyPost.Title
-		mypage.CreatedAt = studyPost.CreatedAt
+		var writedPost entity.MypagePost
 
-		mypagePosts = append(mypagePosts, mypage)
+		writedPost = getStudyPostForMypage(writedPost, studyPost, user.Nickname)
+		writedPosts = append(writedPosts, writedPost)
 	}
+	mypage.WritedStudyPosts = writedPosts
 
-	mypage.StudyPosts = mypagePosts
+	//수정 필요(만약 chatroom이 존재하지 않는다면 error 처리하는 방법 고려)
+	//Get chatrooms by clientID and get studyPosts lists by chatrooms.StudyPost.ID...
+
+	//Get studypost lists about participated
+	var participatedPosts []entity.MypagePost
+	for _, studyPost := range studyPosts {
+		//Get writer nickame about participated post
+		postWriter, postWriterErr := m.userRepo.GetUserByID(studyPost.UserID)
+		if postWriterErr != nil {
+			log.Println("get writer info by id error at get my page application " + postWriterErr.Message)
+			return nil, postWriterErr
+		}
+		var participatedPost entity.MypagePost
+
+		participatedPost = getStudyPostForMypage(participatedPost, studyPost, postWriter.Nickname)
+		participatedPosts = append(participatedPosts, participatedPost)
+	}
+	mypage.ParticipatedStudyPosts = participatedPosts
 
 	return &mypage, nil
 }

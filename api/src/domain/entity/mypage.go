@@ -8,17 +8,18 @@ import (
 )
 
 type Mypage struct {
-	User PublicUser `json:"user"`
-	// StudyPosts StudyPosts   `json:"study_posts"`
-	StudyPosts []MypagePost `json:"study_posts"`
+	User                   PublicUser   `json:"user"`
+	WritedStudyPosts       []MypagePost `json:"writed_study_posts"`
+	ParticipatedStudyPosts []MypagePost `json:"participated_study_posts"`
 }
 
 type MypagePost struct {
+	Writer    string `json:"wirter"`
 	Title     string `json:"title"`
 	CreatedAt string `json:"created_at"`
 }
 
-func (m *Mypage) ResponseJSON() (interface{}, *errors.RestErr) {
+func (m *Mypage) ResponseJSON() ([]byte, *errors.RestErr) {
 	mypage, err := json.Marshal(m)
 	if err != nil {
 		log.Println("marshaling error " + err.Error())

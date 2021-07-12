@@ -59,5 +59,5 @@ func (mypageHandler *MypageHandler) GetMypage(w http.ResponseWriter, r *http.Req
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(mypageRes.([]byte))
+	w.Write(mypageRes)
 }
