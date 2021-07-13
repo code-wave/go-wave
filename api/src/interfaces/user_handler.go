@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/domain/entity"
@@ -86,6 +87,11 @@ func (uh *UserHandler) SaveUser(w http.ResponseWriter, r *http.Request) {
 
 	newUser, err := uh.ua.SaveUser(u)
 	if err != nil {
+		if strings.Contains(err.Message, "duplicated") {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("duplicated email"))
+			return
+		}
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
 		return

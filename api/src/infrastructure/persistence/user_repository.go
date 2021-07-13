@@ -79,6 +79,10 @@ func (r *UserRepo) Get(user *entity.User) *errors.RestErr {
 	defer stmt.Close()
 
 	if err = stmt.QueryRow(user.ID).Scan(&user.ID, &user.Email, &user.Name, &user.Nickname, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			log.Println("error when trying to scan after get user by id " + err.Error())
+			return errors.NewNoRowsError()
+		}
 		log.Println("error when trying to scan after get user by id, ", err)
 		return errors.NewInternalServerError("database error")
 	}
@@ -164,7 +168,7 @@ func (r *UserRepo) FindByEmailAndPassword(lu *entity.User) (*entity.User, *error
 	if err := stmt.QueryRow(lu.Email).
 		Scan(&user.ID, &user.Email, &user.Password, &user.Name, &user.Nickname, &user.CreatedAt, &user.UpdatedAt); err != nil {
 		if strings.Contains(err.Error(), "no rows in result set") {
-			return nil, errors.NewNotFoundError("does not exist that email in database")
+			return nil, errors.NewNotFoundError("cannot find matched email")
 		}
 		log.Println("error when trying to find user by email and password after scan, ", err)
 		return nil, errors.NewInternalServerError("database error")
@@ -172,7 +176,7 @@ func (r *UserRepo) FindByEmailAndPassword(lu *entity.User) (*entity.User, *error
 
 	if err := encryption.VerifyPassword(user.Password, lu.Password); err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {
-			return nil, errors.NewNotFoundError("given password does not match database's password")
+			return nil, errors.NewNotFoundError("cannot find matched password")
 		}
 		return nil, errors.NewInternalServerError("hashing password error")
 	}
