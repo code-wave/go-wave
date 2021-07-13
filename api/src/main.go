@@ -36,6 +36,8 @@ func main() {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
 	r.Get("/users/{user_id}", userHandler.GetUser)
 	r.Get("/users/limit={limit}&offset={offset}", userHandler.GetAllUsers)
+	r.Post("/users/email-duplicated", userHandler.CheckDuplicatedEmail)
+	r.Post("/users/nickname-duplicated", userHandler.CheckDuplicatedNickname)
 	r.Post("/users/signup", userHandler.SaveUser)
 	r.With(middleware.AuthVerifyMiddleware).Patch("/users/{user_id}", userHandler.UpdateUser)
 	r.With(middleware.AuthVerifyMiddleware).Delete("/users/{user_id}", userHandler.DeleteUser)

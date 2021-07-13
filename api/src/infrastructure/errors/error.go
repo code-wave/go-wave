@@ -18,6 +18,24 @@ func NewError(message string) error {
 	return errors.New(message)
 }
 
+//200 duplicated error
+func NewDuplicatedError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Status:  http.StatusOK,
+		Error:   "duplicated",
+	}
+}
+
+//200 wrong information error
+func NewWrongInfoError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Status:  http.StatusOK,
+		Error:   "wrong_info",
+	}
+}
+
 //400
 func NewBadRequestError(message string) *RestErr {
 	return &RestErr{

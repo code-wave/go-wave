@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/domain/entity"
@@ -73,6 +72,46 @@ func (uh *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	// w.Write(user.ResponseJSON().([]byte))
 }
 
+func (uh *UserHandler) CheckDuplicatedEmail(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	var u entity.User
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+		restErr := errors.NewBadRequestError("invalid json body")
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	if duplicatedErr := uh.ua.CheckDuplicatedEmail(u.Email); duplicatedErr != nil {
+		w.WriteHeader(duplicatedErr.Status)
+		w.Write([]byte(duplicatedErr.Message))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (uh *UserHandler) CheckDuplicatedNickname(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
+	var u entity.User
+	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+		restErr := errors.NewBadRequestError("invalid json body")
+		w.WriteHeader(restErr.Status)
+		w.Write(restErr.ResponseJSON().([]byte))
+		return
+	}
+
+	if duplicatedErr := uh.ua.CheckDuplicatedNickname(u.Nickname); duplicatedErr != nil {
+		w.WriteHeader(duplicatedErr.Status)
+		w.Write([]byte(duplicatedErr.Message))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (uh *UserHandler) SaveUser(w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)
 
@@ -85,13 +124,14 @@ func (uh *UserHandler) SaveUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	newUser, err := uh.ua.SaveUser(u)
+	newUser, err := uh.ua.SaveUser(&u)
 	if err != nil {
-		if strings.Contains(err.Message, "duplicated") {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("duplicated email"))
-			return
-		}
+		// //이 부분 처리는 이메일 중복확인 handler에서 처리
+		// if strings.Contains(err.Message, "duplicated email") {
+		// 	w.WriteHeader(http.StatusOK)
+		// 	w.Write([]byte("duplicated email"))
+		// 	return
+		// }
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
 		return
@@ -119,7 +159,7 @@ func (uh *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	u.ID = userID
-	updateUser, err := uh.ua.UpdateUser(u)
+	updateUser, err := uh.ua.UpdateUser(&u)
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
