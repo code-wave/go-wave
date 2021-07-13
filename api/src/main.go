@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/code-wave/go-wave/infrastructure/chat"
 	"log"
 	"net/http"
 
@@ -27,6 +28,9 @@ func main() {
 		log.Println(err)
 		return
 	}
+
+	chatServer := chat.NewChatServer()
+	go chatServer.Run()
 
 	r := chi.NewRouter()
 	//users
