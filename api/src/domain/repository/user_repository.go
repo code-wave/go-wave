@@ -13,4 +13,6 @@ type UserRepository interface {
 	Update(*entity.User) *errors.RestErr
 	Delete(int64) *errors.RestErr
 	FindByEmailAndPassword(*entity.User) (*entity.User, *errors.RestErr)
+	FindByEmail(string) *errors.RestErr
+	FindByNickname(string) *errors.RestErr
 }

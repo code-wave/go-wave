@@ -17,6 +17,8 @@ const (
 	queryGetUserByID            = "SELECT id, email, name, nickname, created_at, updated_at FROM users WHERE id = $1;"
 	queryGetAllUsers            = "SELECT * FROM users LIMIT $1 OFFSET $2;"
 	queryFindByEmailAndPassword = "SELECT id, email, password, name, nickname, created_at, updated_at FROM users WHERE email = $1;"
+	queryFindByEmail            = "SELECT email FROM users WHERE email = $1"
+	queryFindByNickname         = "SELECT nickname FROM users where nickname = $1"
 	queryUpdateUser             = "UPDATE users SET password = $1, name = $2, nickname = $3, updated_at = $4 WHERE id = $5;"
 	queryDeleteUser             = "DELETE FROM users WHERE id = $1;"
 )
@@ -79,6 +81,10 @@ func (r *UserRepo) Get(user *entity.User) *errors.RestErr {
 	defer stmt.Close()
 
 	if err = stmt.QueryRow(user.ID).Scan(&user.ID, &user.Email, &user.Name, &user.Nickname, &user.CreatedAt, &user.UpdatedAt); err != nil {
+		if strings.Contains(err.Error(), "no rows in result set") {
+			log.Println("error when trying to scan after get user by id " + err.Error())
+			return errors.NewNoRowsError()
+		}
 		log.Println("error when trying to scan after get user by id, ", err)
 		return errors.NewInternalServerError("database error")
 	}
@@ -164,7 +170,7 @@ func (r *UserRepo) FindByEmailAndPassword(lu *entity.User) (*entity.User, *error
 	if err := stmt.QueryRow(lu.Email).
 		Scan(&user.ID, &user.Email, &user.Password, &user.Name, &user.Nickname, &user.CreatedAt, &user.UpdatedAt); err != nil {
 		if strings.Contains(err.Error(), "no rows in result set") {
-			return nil, errors.NewNotFoundError("does not exist that email in database")
+			return nil, errors.NewNotFoundError("wrong, email does not matched")
 		}
 		log.Println("error when trying to find user by email and password after scan, ", err)
 		return nil, errors.NewInternalServerError("database error")
@@ -172,10 +178,52 @@ func (r *UserRepo) FindByEmailAndPassword(lu *entity.User) (*entity.User, *error
 
 	if err := encryption.VerifyPassword(user.Password, lu.Password); err != nil {
 		if err == bcrypt.ErrMismatchedHashAndPassword {
-			return nil, errors.NewNotFoundError("given password does not match database's password")
+			return nil, errors.NewNotFoundError("wrong, password does not matched")
 		}
 		return nil, errors.NewInternalServerError("hashing password error")
 	}
 
 	return &user, nil
+}
+
+func (r *UserRepo) FindByEmail(email string) *errors.RestErr {
+	stmt, err := r.db.Prepare(queryFindByEmail)
+	if err != nil {
+		log.Println("error when trying to prepare to find by email " + err.Error())
+		return errors.NewInternalServerError("database error " + err.Error())
+	}
+	defer stmt.Close()
+
+	var u entity.User
+	if err := stmt.QueryRow(email).Scan(&u.Email); err != nil {
+		if err == sql.ErrNoRows {
+			log.Println("email doesn't exits " + err.Error())
+			return errors.NewNotFoundError("email doesn't exits " + err.Error())
+		}
+		log.Println("error when trying to scan to find by email " + err.Error())
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	return nil
+}
+
+func (r *UserRepo) FindByNickname(nickname string) *errors.RestErr {
+	stmt, err := r.db.Prepare(queryFindByNickname)
+	if err != nil {
+		log.Println("error when trying to prepare to find by email " + err.Error())
+		return errors.NewInternalServerError("database error " + err.Error())
+	}
+	defer stmt.Close()
+
+	var u entity.User
+	if err := stmt.QueryRow(nickname).Scan(&u.Nickname); err != nil {
+		if err == sql.ErrNoRows {
+			log.Println("nickname doesn't exits " + err.Error())
+			return errors.NewNotFoundError("nickname doesn't exits " + err.Error())
+		}
+		log.Println("error when trying to scan to find by nickname " + err.Error())
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	return nil
 }

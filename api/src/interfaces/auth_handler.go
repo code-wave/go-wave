@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/code-wave/go-wave/infrastructure/helpers"
 
@@ -27,6 +28,7 @@ func NewAuthHandler(ua application.UserAppInterface, au application.AuthAppInter
 
 func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)
+
 	var lu *entity.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&lu); err != nil {
 		restErr := errors.NewBadRequestError("invalid json body")
@@ -36,12 +38,23 @@ func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	user := entity.User{
+	user := &entity.User{
 		Email:    lu.Email,
 		Password: lu.Password,
 	}
 
-	result, err := ah.ua.LoginUser(user)
+	findUser, err := ah.ua.FindByEmailAndPassword(user)
+	if err != nil {
+		w.WriteHeader(err.Status)
+		if strings.Contains(err.Message, "wrong") {
+			w.Write([]byte(err.Message))
+			return
+		}
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	result, err := ah.ua.LoginUser(findUser)
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
