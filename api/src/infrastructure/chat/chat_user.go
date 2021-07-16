@@ -49,7 +49,7 @@ func NewChatUser(id int64, name, nickname string, conn *websocket.Conn, wsServer
 	}
 }
 
-func (c *ChatUser) readPump() {
+func (c *ChatUser) ReadPump() {
 	defer func() {
 		c.disconnect()
 	}()
@@ -72,7 +72,7 @@ func (c *ChatUser) readPump() {
 
 }
 
-func (c *ChatUser) writePump() {
+func (c *ChatUser) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
@@ -120,12 +120,12 @@ func (c *ChatUser) writePump() {
 
 func (c *ChatUser) disconnect() {
 	var chatServerReq ChatServerRequest
-	chatServerReq.user = c
+	chatServerReq.User = c
 
 	for _, room := range c.ChatRooms { // 사용자가 속한 모든 방과 disconnect
 		roomName := room.roomName
-		chatServerReq.roomName = roomName
-		c.WsServer.unregister <- chatServerReq
+		chatServerReq.ChatRoomName = roomName
+		c.WsServer.Unregister <- chatServerReq
 	}
 
 	for _, room := range c.ChatRooms {

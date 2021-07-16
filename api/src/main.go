@@ -73,6 +73,15 @@ func main() {
 	r.Post("/tech-stack", techStackHandler.SaveTechStack)
 	r.Delete("/tech-stack/tech-name={tech_name}", techStackHandler.DeleteTechStack)
 
+	//chat
+	chatApp := application.NewChatApp(services.Chat)
+	chatHandler := interfaces.NewChatHandler(userApp, studyPostApp, chatApp)
+
+	r.Post("/chat/chatroom-info", chatHandler.GetChatRoomInfo)
+	r.Post("/chat/serve-ws", func(w http.ResponseWriter, r *http.Request) {
+		chatHandler.ServeChatWs(chatServer, w, r)
+	})
+
 	//cors option
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},

@@ -8,23 +8,18 @@ import (
 type ChatServer struct {
 	//users      entity.Users
 	chatUsers    map[int64]*ChatUser // key=userID
-	register     chan ChatServerRequest
-	unregister   chan ChatServerRequest
-	rooms        map[string]*ChatRoom // key=roomName
+	Register     chan ChatServerRequest
+	Unregister   chan ChatServerRequest
+	rooms        map[string]*ChatRoom // key=ChatRoomName
 	redisService *persistence.RedisService
 	chatRepo     repository.ChatRepository
-}
-
-type ChatServerRequest struct {
-	user     *ChatUser
-	roomName string
 }
 
 func NewChatServer() *ChatServer {
 	return &ChatServer{
 		chatUsers:  make(map[int64]*ChatUser),
-		register:   make(chan ChatServerRequest),
-		unregister: make(chan ChatServerRequest),
+		Register:   make(chan ChatServerRequest),
+		Unregister: make(chan ChatServerRequest),
 		rooms:      make(map[string]*ChatRoom),
 	}
 }
@@ -33,11 +28,11 @@ func (c *ChatServer) Run() {
 	for {
 		select {
 
-		case req := <-c.register:
-			c.registerUser(req.user, req.roomName)
+		case req := <-c.Register:
+			c.registerUser(req.User, req.ChatRoomName)
 
-		case req := <-c.unregister:
-			c.unregisterUser(req.user, req.roomName)
+		case req := <-c.Unregister:
+			c.unregisterUser(req.User, req.ChatRoomName)
 		}
 	}
 }
@@ -54,6 +49,7 @@ func (c *ChatServer) unregisterUser(user *ChatUser, roomName string) {
 	}
 }
 
+//CreateRoom: 메모리상에 채팅룸 생성
 func (c *ChatServer) CreateRoom(roomName string) *ChatRoom {
 	room := NewChatRoom(roomName, c.redisService, c.chatRepo)
 	c.rooms[roomName] = room
