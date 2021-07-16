@@ -2,6 +2,8 @@ package interfaces
 
 import (
 	"encoding/json"
+	"github.com/code-wave/go-wave/infrastructure/helpers"
+	"log"
 	"net/http"
 
 	"github.com/code-wave/go-wave/application"
@@ -31,6 +33,8 @@ func NewChatHandler(userApp application.UserAppInterface, studyPostApp applicati
 
 // ServeChatWs: roomName과 유저정보를 보내면 websocket 연결시켜줌
 func (chatHandler *ChatHandler) ServeChatWs(chatServer *chat.ChatServer, w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
 	var wsReq chat.WsRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&wsReq); err != nil {
@@ -76,6 +80,8 @@ func (chatHandler *ChatHandler) ServeChatWs(chatServer *chat.ChatServer, w http.
 
 // GetChatRoomInfo: 채팅룸과 기존메시지(존재하면)를 반환함
 func (chatHandler *ChatHandler) GetChatRoomInfo(w http.ResponseWriter, r *http.Request) {
+	helpers.SetJsonHeader(w)
+
 	var chatReq chat.ChatRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&chatReq); err != nil {
@@ -96,8 +102,10 @@ func (chatHandler *ChatHandler) GetChatRoomInfo(w http.ResponseWriter, r *http.R
 
 	// 채팅룸이 기존에 존재하는지 새로 만들어야하는지 확인
 	isRoomExist := true
+	log.Println("checkpoint111111111111111111111111111111")
 	chatRoom, err := chatHandler.chatApp.GetChatRoom(chatReq.UserID, hostUserID, chatReq.StudyPostID) // chatReq.UserID = clientID
 	if err != nil {
+
 		if err.Message == errors.ErrNoRows { // 기존 채팅룸이 존재하지 않으므로 새로운 방 만듬
 			chatRoom, restErr := chatHandler.chatApp.SaveChatRoom(chatReq.UserID, hostUserID, chatReq.StudyPostID)
 			if restErr != nil {
@@ -105,6 +113,7 @@ func (chatHandler *ChatHandler) GetChatRoomInfo(w http.ResponseWriter, r *http.R
 				w.Write(restErr.ResponseJSON().([]byte))
 				return
 			}
+
 			isRoomExist = false
 			var messages chat.Messages
 			chatRes := chat.ChatResponse{
@@ -122,6 +131,7 @@ func (chatHandler *ChatHandler) GetChatRoomInfo(w http.ResponseWriter, r *http.R
 
 			w.WriteHeader(http.StatusOK)
 			w.Write(cJSON)
+			return
 		}
 
 		w.WriteHeader(err.Status)

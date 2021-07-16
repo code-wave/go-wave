@@ -2,7 +2,6 @@ package persistence
 
 import (
 	"database/sql"
-
 	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/infrastructure/errors"
 	"github.com/code-wave/go-wave/infrastructure/helpers"
@@ -22,13 +21,13 @@ func (c *chatRepo) GetChatRoom(clientID, hostID, studyPostID int64) (*entity.Cha
 	stmt, err := c.db.Prepare(`
 		SELECT *
 		FROM chat_room
-		WHERE client_id=$1 AND host_id=$2 AND studyPostID=$3;
+		WHERE client_id=$1 AND host_id=$2 AND study_post_id=$3;
 	`)
 	if err != nil {
 		return nil, errors.NewInternalServerError("database error " + err.Error())
 	}
 
-	var chatRoom *entity.ChatRoom
+	var chatRoom entity.ChatRoom
 
 	err = stmt.QueryRow(clientID, hostID, studyPostID).Scan(&chatRoom.ID, &chatRoom.RoomName, &chatRoom.ClientID, &chatRoom.HostID, &chatRoom.StudyPostID)
 	if err != nil {
@@ -40,12 +39,12 @@ func (c *chatRepo) GetChatRoom(clientID, hostID, studyPostID int64) (*entity.Cha
 		return nil, errors.NewInternalServerError("database error " + err.Error())
 	}
 
-	return chatRoom, nil
+	return &chatRoom, nil
 }
 
 func (c *chatRepo) SaveChatRoom(clientID, hostID, studyPostID int64) (*entity.ChatRoom, *errors.RestErr) {
 	stmt, err := c.db.Prepare(`
-		INSERT INTO chat_room (client_id, room_name, host_id, study_post_id)
+		INSERT INTO chat_room (room_name, client_id, host_id, study_post_id)
 		VALUES ($1, $2, $3, $4)
 		RETURNING *;
 	`)
@@ -57,7 +56,7 @@ func (c *chatRepo) SaveChatRoom(clientID, hostID, studyPostID int64) (*entity.Ch
 
 	roomName := uuid.New()
 
-	err = stmt.QueryRow(roomName, clientID, hostID, studyPostID).Scan(&newRoom.ID, &newRoom.ClientID, &newRoom.RoomName, &newRoom.HostID, &newRoom.StudyPostID)
+	err = stmt.QueryRow(roomName, clientID, hostID, studyPostID).Scan(&newRoom.ID, &newRoom.RoomName, &newRoom.ClientID, &newRoom.HostID, &newRoom.StudyPostID)
 	if err != nil {
 		return nil, errors.NewInternalServerError("query row error " + err.Error())
 	}
