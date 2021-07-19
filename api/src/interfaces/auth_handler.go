@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/code-wave/go-wave/infrastructure/helpers"
 
@@ -27,6 +28,7 @@ func NewAuthHandler(ua application.UserAppInterface, au application.AuthAppInter
 
 func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)
+
 	var lu *entity.LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&lu); err != nil {
 		restErr := errors.NewBadRequestError("invalid json body")
@@ -36,25 +38,46 @@ func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	user := entity.User{
+	user := &entity.User{
 		Email:    lu.Email,
 		Password: lu.Password,
 	}
 
-	result, err := ah.ua.LoginUser(user)
+	findUser, err := ah.ua.FindByEmailAndPassword(user)
+	if err != nil {
+		w.WriteHeader(err.Status)
+		if strings.Contains(err.Message, "wrong") {
+			w.Write([]byte(err.Message))
+			return
+		}
+		w.Write(err.ResponseJSON().([]byte))
+		return
+	}
+
+	result, err := ah.ua.LoginUser(findUser)
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
 		return
 	}
 
+	//respose payload(user, accessToken, refreshToken)
+	pUser := result["user"].(*entity.User)
+	at := result["access_token"].(*entity.AccessToken)
 	rt := result["refresh_token"].(*entity.RefreshToken)
+
+	atCookie := http.Cookie{
+		Name:     "access_token",
+		Value:    at.AccessToken,
+		HttpOnly: true,
+	}
 
 	rtCookie := http.Cookie{
 		Name:     "refresh_uuid",
 		Value:    rt.Uuid,
 		HttpOnly: true,
 	}
+	http.SetCookie(w, &atCookie)
 	http.SetCookie(w, &rtCookie)
 
 	//save result["refreshToken"] to redis metadata
@@ -63,10 +86,6 @@ func (ah *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		w.Write(authErr.ResponseJSON().([]byte))
 		return
 	}
-
-	//respose payload(user, accessToken)
-	pUser := result["user"].(*entity.User)
-	at := result["access_token"].(*entity.AccessToken)
 
 	jsonData, jsonErr := json.Marshal(map[string]interface{}{
 		"user":         pUser.PublicUser(),
@@ -119,7 +138,7 @@ func (ah *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	at, authErr := ah.au.Refresh(refreshUuid.Value, userID.(uint64))
+	at, authErr := ah.au.Refresh(refreshUuid.Value, userID.(int64))
 	if authErr != nil {
 		w.WriteHeader(authErr.Status)
 		w.Write(authErr.ResponseJSON().([]byte))

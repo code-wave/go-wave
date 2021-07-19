@@ -11,6 +11,7 @@ type StudyPosts []StudyPost
 
 type StudyPost struct {
 	ID           int64    `json:"id"`
+	UserID       int64    `json:"user_id"`
 	Title        string   `json:"title"` // 게시글 제목
 	Topic        string   `json:"topic"` // 프로젝트 주제
 	Content      string   `json:"content"`
@@ -19,7 +20,6 @@ type StudyPost struct {
 	Price        int64    `json:"price"`      // 1인당 필요한 가격
 	StartDate    string   `json:"start_date"` // 프로젝트 시작
 	EndDate      string   `json:"end_date"`   // 프로젝트 끝
-	UserID       int64    `json:"user_id"`
 	IsOnline     bool     `json:"is_online"`
 	TechStack    []string `json:"tech_stack"`
 	CreatedAt    string   `json:"created_at"`

@@ -5,6 +5,7 @@ import (
 	"github.com/code-wave/go-wave/domain/repository"
 	"github.com/code-wave/go-wave/infrastructure/errors"
 	"github.com/code-wave/go-wave/infrastructure/helpers"
+	"strings"
 )
 
 type techStackApp struct {
@@ -28,6 +29,7 @@ func NewTechStackApp(techStackRepo repository.TechStackRepository) *techStackApp
 }
 
 func (t *techStackApp) SaveTechStack(techName string) *errors.RestErr {
+	techName = strings.ToLower(techName)
 	return t.techStackRepo.SaveTechStack(techName)
 }
 

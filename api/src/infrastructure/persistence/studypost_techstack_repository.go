@@ -66,8 +66,3 @@ func (s *studyPostTechStackRepo) UpdateStudyPostTechStack(studyPostID int64, tec
 
 	return s.SaveStudyPostTechStack(studyPostID, techStack)
 }
-
-//func (s *studyPostTechStackRepo) updateAllTechStackQuery(studyPostID int64, techStack []string) string {
-//	// TODO: query
-//	query := fmt.Sprintf("UPDATE study_post_tech_stack SET tech_stack_id=, id FROM tech_stack WHERE tech_name IN (", studyPostID)
-//}

@@ -30,11 +30,11 @@ type JwtInfo struct {
 }
 
 type Claims struct {
-	UserID uint64
+	UserID int64
 	jwt.StandardClaims
 }
 
-func (j *JwtInfo) GenerateAccessToken(userID uint64) (*entity.AccessToken, error) {
+func (j *JwtInfo) GenerateAccessToken(userID int64) (*entity.AccessToken, error) {
 	atClaims := &Claims{
 		UserID: userID,
 		StandardClaims: jwt.StandardClaims{
@@ -59,7 +59,7 @@ func (j *JwtInfo) GenerateAccessToken(userID uint64) (*entity.AccessToken, error
 	return at, nil
 }
 
-func (j *JwtInfo) GenerateRefreshToken(userID uint64) (*entity.RefreshToken, error) {
+func (j *JwtInfo) GenerateRefreshToken(userID int64) (*entity.RefreshToken, error) {
 	rtClaims := &Claims{
 		UserID: userID,
 		StandardClaims: jwt.StandardClaims{
@@ -85,7 +85,7 @@ func (j *JwtInfo) GenerateRefreshToken(userID uint64) (*entity.RefreshToken, err
 	return rt, nil
 }
 
-func (j *JwtInfo) GenerateTokenPair(userID uint64) (map[string]interface{}, error) {
+func (j *JwtInfo) GenerateTokenPair(userID int64) (map[string]interface{}, error) {
 	at, err := j.GenerateAccessToken(userID)
 	if err != nil {
 		return nil, err

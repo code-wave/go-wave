@@ -6,27 +6,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/code-wave/go-wave/infrastructure/date"
 	"github.com/code-wave/go-wave/infrastructure/encryption"
 	"github.com/code-wave/go-wave/infrastructure/errors"
+	"github.com/code-wave/go-wave/infrastructure/helpers"
 )
 
 type Users []User
 
 type User struct {
-	ID        uint64         `json:"id"`
+	ID        int64          `json:"id"`
 	Email     string         `json:"email"`
 	Password  string         `json:"password"`
 	Name      string         `json:"name"`
 	Nickname  string         `json:"nickname"`
 	CreatedAt string         `json:"created_at"`
 	UpdatedAt sql.NullString `json:"updated_at"`
-}
-
-type PublicUser struct {
-	ID       uint64 `json:"id"`
-	Name     string `json:"name"`
-	Nickname string `json:"nickname"`
 }
 
 type LoginRequest struct {
@@ -57,7 +51,7 @@ func (user *User) Validate() *errors.RestErr {
 
 func (u *User) BeforeSave() *errors.RestErr {
 	u.Password, _ = encryption.Hash(u.Password)
-	u.CreatedAt = date.GetDateString(time.Now())
+	u.CreatedAt = helpers.GetDateString(time.Now())
 
 	return nil
 }

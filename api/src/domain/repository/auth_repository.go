@@ -8,5 +8,5 @@ import (
 type AuthRepository interface {
 	Create(*entity.RefreshToken) *errors.RestErr
 	Delete(string) *errors.RestErr
-	Fetch(string) (uint64, *errors.RestErr)
+	Fetch(string) (int64, *errors.RestErr)
 }

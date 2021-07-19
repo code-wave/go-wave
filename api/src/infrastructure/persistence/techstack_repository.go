@@ -25,7 +25,7 @@ func (t *techStackRepo) SaveTechStack(techName string) *errors.RestErr {
 		VALUES ($1);
 	`)
 	if err != nil {
-		return errors.NewInternalServerError("database error")
+		return errors.NewInternalServerError("database error " + err.Error())
 	}
 
 	_, err = stmt.Exec(techName)

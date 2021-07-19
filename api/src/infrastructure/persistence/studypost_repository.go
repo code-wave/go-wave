@@ -2,7 +2,7 @@ package persistence
 
 import (
 	"database/sql"
-	"fmt"
+
 	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/domain/repository"
 	"github.com/code-wave/go-wave/infrastructure/errors"
@@ -150,29 +150,47 @@ func (s *studyPostRepo) GetPostsByUserID(userID, limit, offset int64) (entity.St
 }
 
 func (s *studyPostRepo) UpdatePost(studyPost *entity.StudyPost) (*entity.StudyPost, *errors.RestErr) {
-	query := s.updatePostQuery(studyPost)
-
-	stmt, err := s.db.Prepare(query)
+	tx, err := s.db.Begin()
+	if err != nil {
+		return nil, errors.NewInternalServerError("database error " + err.Error())
+	}
+	stmt, err := tx.Prepare(`
+		UPDATE study_post
+		SET title=$1, topic=$2, content=$3, num_of_members=$4, is_mentor=$5, price=$6,
+		    start_date=$7, end_date=$8, is_online=$9, tech_stack=$10, updated_at=$11
+		WHERE id=$12
+		RETURNING *;
+	`)
+	//stmt, err := s.db.Prepare(`
+	//	UPDATE study_post
+	//	SET title=$1, topic=$2, content=$3, num_of_members=$4, is_mentor=$5, price=$6,
+	//	    start_date=$7, end_date=$8, is_online=$9, tech_stack=$10, updated_at=$11
+	//	WHERE id=$12
+	//	RETURNING *;
+	//`)
 	if err != nil {
 		return nil, errors.NewInternalServerError("database error " + err.Error())
 	}
 
-	err = stmt.QueryRow().Scan(&studyPost.ID, &studyPost.Title, &studyPost.Topic, &studyPost.Content, &studyPost.NumOfMembers,
-		&studyPost.IsMentor, &studyPost.Price, &studyPost.StartDate, &studyPost.EndDate, &studyPost.UserID, &studyPost.IsOnline, pq.Array(&studyPost.TechStack), &studyPost.CreatedAt, &studyPost.UpdatedAt)
+	now := helpers.GetCurrentTimeForDB()
+	row := stmt.QueryRow(studyPost.Title, studyPost.Topic, studyPost.Content, studyPost.NumOfMembers, studyPost.IsMentor, studyPost.Price, studyPost.StartDate,
+		studyPost.EndDate, studyPost.IsOnline, pq.Array(studyPost.TechStack), now, studyPost.ID)
+	err = row.Err()
 	if err != nil {
-		return nil, errors.NewInternalServerError("database error " + err.Error())
+		return nil, errors.NewInternalServerError("query row error " + err.Error())
+	}
+
+	err = row.Scan(&studyPost.ID, &studyPost.UserID, &studyPost.Title, &studyPost.Topic, &studyPost.Content, &studyPost.NumOfMembers,
+		&studyPost.IsMentor, &studyPost.Price, &studyPost.StartDate, &studyPost.EndDate, &studyPost.IsOnline, pq.Array(&studyPost.TechStack), &studyPost.CreatedAt, &studyPost.UpdatedAt)
+	if err != nil {
+		rErr := tx.Rollback() // 에러시 rollback
+		if rErr != nil {
+			return nil, errors.NewInternalServerError("rollback error " + err.Error())
+		}
+		return nil, errors.NewInternalServerError("database update error " + err.Error())
 	}
 
 	return studyPost, nil
-}
-
-func (s *studyPostRepo) updatePostQuery(studyPost *entity.StudyPost) string {
-	now := helpers.GetCurrentTimeForDB()
-	query := fmt.Sprintf("UPDATE study_post SET title=%s, topic=%s, content=%s, num_of_members=%s, is_mentor=%s, price=%s, start_date=%s, end_date=%s, is_online=%s, tech_stack=%s, updated_at=%s WHERE id=%d RETURNING *;",
-		studyPost.Title, studyPost.Topic, studyPost.Content, studyPost.NumOfMembers, studyPost.IsMentor, studyPost.Price, studyPost.StartDate,
-		studyPost.EndDate, studyPost.IsOnline, pq.Array(studyPost.TechStack), now, studyPost.ID)
-
-	return query
 }
 
 func (s *studyPostRepo) DeletePost(studyPostID int64) *errors.RestErr {
