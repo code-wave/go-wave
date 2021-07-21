@@ -79,7 +79,6 @@ func main() {
 	chatHandler := interfaces.NewChatHandler(userApp, studyPostApp, chatApp)
 
 	r.Post("/chat/chatroom-info", chatHandler.GetChatRoomInfo)
-
 	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		chatHandler.ServeChatWs(chatServer, w, r)
 	})

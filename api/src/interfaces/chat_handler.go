@@ -16,6 +16,7 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  4096,
 	WriteBufferSize: 4096,
+	//websocket origin setting
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
@@ -105,7 +106,6 @@ func (chatHandler *ChatHandler) GetChatRoomInfo(w http.ResponseWriter, r *http.R
 	isRoomExist := true
 	chatRoom, err := chatHandler.chatApp.GetChatRoom(chatReq.UserID, hostUserID, chatReq.StudyPostID) // chatReq.UserID = clientID
 	if err != nil {
-
 		if err.Message == errors.ErrNoRows { // 기존 채팅룸이 존재하지 않으므로 새로운 방 만듬
 			chatRoom, restErr := chatHandler.chatApp.SaveChatRoom(chatReq.UserID, hostUserID, chatReq.StudyPostID)
 			if restErr != nil {
