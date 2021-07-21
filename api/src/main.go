@@ -78,7 +78,10 @@ func main() {
 	chatHandler := interfaces.NewChatHandler(userApp, studyPostApp, chatApp)
 
 	r.Post("/chat/chatroom-info", chatHandler.GetChatRoomInfo)
-	r.Post("/chat/serve-ws", func(w http.ResponseWriter, r *http.Request) {
+	//r.Post("/chat/serve-ws", func(w http.ResponseWriter, r *http.Request) {
+	//	chatHandler.ServeChatWs(chatServer, w, r)
+	//})
+	r.HandleFunc("/ws/chat/servews", func(w http.ResponseWriter, r *http.Request) {
 		chatHandler.ServeChatWs(chatServer, w, r)
 	})
 

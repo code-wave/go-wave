@@ -33,14 +33,20 @@ func NewChatHandler(userApp application.UserAppInterface, studyPostApp applicati
 
 // ServeChatWs: roomName과 유저정보를 보내면 websocket 연결시켜줌
 func (chatHandler *ChatHandler) ServeChatWs(chatServer *chat.ChatServer, w http.ResponseWriter, r *http.Request) {
+	log.Println("servechatws checkkkkkkk")
+	// websocket 기능 추가
+	conn, wsErr := upgrader.Upgrade(w, r, nil)
+	if wsErr != nil {
+		log.Println("ws error: ", wsErr)
+		return
+	}
+
 	helpers.SetJsonHeader(w)
 
 	var wsReq chat.WsRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&wsReq); err != nil {
-		restErr := errors.NewBadRequestError("invalid json body " + err.Error())
-		w.WriteHeader(restErr.Status)
-		w.Write(restErr.ResponseJSON().([]byte))
+		log.Println("decode error: ", err)
 		return
 	}
 	defer r.Body.Close()
@@ -50,15 +56,6 @@ func (chatHandler *ChatHandler) ServeChatWs(chatServer *chat.ChatServer, w http.
 	if err != nil {
 		w.WriteHeader(err.Status)
 		w.Write(err.ResponseJSON().([]byte))
-		return
-	}
-
-	// websocket 기능 추가
-	conn, wsErr := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		restErr := errors.NewInternalServerError("ws upgrade error " + wsErr.Error())
-		w.WriteHeader(restErr.Status)
-		w.Write(restErr.ResponseJSON().([]byte))
 		return
 	}
 
@@ -102,7 +99,6 @@ func (chatHandler *ChatHandler) GetChatRoomInfo(w http.ResponseWriter, r *http.R
 
 	// 채팅룸이 기존에 존재하는지 새로 만들어야하는지 확인
 	isRoomExist := true
-	log.Println("checkpoint111111111111111111111111111111")
 	chatRoom, err := chatHandler.chatApp.GetChatRoom(chatReq.UserID, hostUserID, chatReq.StudyPostID) // chatReq.UserID = clientID
 	if err != nil {
 
