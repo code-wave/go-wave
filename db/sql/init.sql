@@ -69,7 +69,7 @@ create table chat_room (
 
 create table chat_message (
     chat_room_id bigint NOT NULL,
-    chat_room_name varchar(48) UNIQUE NOT NULL,
+    chat_room_name varchar(48)  NOT NULL,
     sender_id bigint NOT NULL,
     sender varchar(48) NOT NULL,
     message_type varchar(48) NOT NULL,

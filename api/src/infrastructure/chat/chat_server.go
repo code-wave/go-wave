@@ -1,6 +1,8 @@
 package chat
 
 import (
+	"log"
+
 	"github.com/code-wave/go-wave/domain/repository"
 	"github.com/code-wave/go-wave/infrastructure/persistence"
 )
@@ -15,12 +17,14 @@ type ChatServer struct {
 	chatRepo     repository.ChatRepository
 }
 
-func NewChatServer() *ChatServer {
+func NewChatServer(redis *persistence.RedisService, chatRepo repository.ChatRepository) *ChatServer {
 	return &ChatServer{
-		chatUsers:  make(map[int64]*ChatUser),
-		Register:   make(chan ChatServerRequest),
-		Unregister: make(chan ChatServerRequest),
-		rooms:      make(map[string]*ChatRoom),
+		chatUsers:    make(map[int64]*ChatUser),
+		Register:     make(chan ChatServerRequest),
+		Unregister:   make(chan ChatServerRequest),
+		rooms:        make(map[string]*ChatRoom),
+		redisService: redis,
+		chatRepo:     chatRepo,
 	}
 }
 
@@ -52,7 +56,9 @@ func (c *ChatServer) unregisterUser(user *ChatUser, roomName string) {
 //CreateRoom: 메모리상에 채팅룸 생성
 func (c *ChatServer) CreateRoom(roomName string) *ChatRoom {
 	room := NewChatRoom(roomName, c.redisService, c.chatRepo)
+
 	c.rooms[roomName] = room
+	log.Println(c.rooms)
 
 	go room.RunRoom()
 
