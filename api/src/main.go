@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/code-wave/go-wave/infrastructure/chat"
 	"log"
 	"net/http"
+
+	"github.com/code-wave/go-wave/infrastructure/chat"
 
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/infrastructure/persistence"
@@ -29,7 +30,7 @@ func main() {
 		return
 	}
 
-	chatServer := chat.NewChatServer()
+	chatServer := chat.NewChatServer(redisService, services.Chat)
 	go chatServer.Run()
 
 	r := chi.NewRouter()
@@ -37,7 +38,7 @@ func main() {
 	userApp := application.NewUserApp(services.User)
 	userHandler := interfaces.NewUserHandler(userApp)
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
+	// r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
 	r.Get("/users/{user_id}", userHandler.GetUser)
 	r.Get("/users/limit={limit}&offset={offset}", userHandler.GetAllUsers)
 	r.Post("/users/signup", userHandler.SaveUser)
@@ -78,11 +79,12 @@ func main() {
 	chatHandler := interfaces.NewChatHandler(userApp, studyPostApp, chatApp)
 
 	r.Post("/chat/chatroom-info", chatHandler.GetChatRoomInfo)
-	r.Post("/chat/serve-ws", func(w http.ResponseWriter, r *http.Request) {
+
+	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		chatHandler.ServeChatWs(chatServer, w, r)
 	})
 
-	//cors option
+	// cors option
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,

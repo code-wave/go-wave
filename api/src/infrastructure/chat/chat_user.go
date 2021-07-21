@@ -3,9 +3,10 @@ package chat
 import "C"
 import (
 	"encoding/json"
-	"github.com/gorilla/websocket"
 	"log"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -67,6 +68,7 @@ func (c *ChatUser) ReadPump() {
 			break
 		}
 
+		log.Printf("%s", jsonMessage)
 		c.handleNewMessage(jsonMessage)
 	}
 
@@ -144,6 +146,7 @@ func (c *ChatUser) handleNewMessage(jsonMessage []byte) {
 	}
 
 	roomName := chatMessage.ChatRoomName
+
 	chatRoom, ok := c.ChatRooms[roomName]
 	if !ok {
 		log.Fatal("chatroom doesn't exist")

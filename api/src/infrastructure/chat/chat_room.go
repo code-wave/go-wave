@@ -3,10 +3,11 @@ package chat
 import (
 	"context"
 	"encoding/json"
+	"log"
+
 	"github.com/code-wave/go-wave/domain/entity"
 	"github.com/code-wave/go-wave/domain/repository"
 	"github.com/code-wave/go-wave/infrastructure/persistence"
-	"log"
 )
 
 type ChatRoom struct {
@@ -32,6 +33,7 @@ func NewChatRoom(roomName string, redis *persistence.RedisService, chatRepositor
 }
 
 func (c *ChatRoom) RunRoom() {
+	log.Println(c.redisService)
 	go c.subscribeRoom()
 
 	for {
@@ -101,6 +103,7 @@ func (c *ChatRoom) publishMessage(message []byte) {
 }
 
 func (c *ChatRoom) subscribeRoom() {
+
 	pubsub := c.redisService.RClient.Subscribe(context.Background(), c.roomName)
 	ch := pubsub.Channel()
 

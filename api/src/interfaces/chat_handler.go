@@ -2,9 +2,10 @@ package interfaces
 
 import (
 	"encoding/json"
-	"github.com/code-wave/go-wave/infrastructure/helpers"
 	"log"
 	"net/http"
+
+	"github.com/code-wave/go-wave/infrastructure/helpers"
 
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/infrastructure/chat"
@@ -15,6 +16,9 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  4096,
 	WriteBufferSize: 4096,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 type ChatHandler struct {
@@ -34,39 +38,36 @@ func NewChatHandler(userApp application.UserAppInterface, studyPostApp applicati
 // ServeChatWs: roomName과 유저정보를 보내면 websocket 연결시켜줌
 func (chatHandler *ChatHandler) ServeChatWs(chatServer *chat.ChatServer, w http.ResponseWriter, r *http.Request) {
 	helpers.SetJsonHeader(w)
+	log.Println("ws conneting....")
+
+	// websocket 기능 추가
+	conn, wsErr := upgrader.Upgrade(w, r, nil)
+	if wsErr != nil {
+		log.Println("wsErr " + wsErr.Error())
+		//error 처리 고민...
+		return
+	}
 
 	var wsReq chat.WsRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&wsReq); err != nil {
-		restErr := errors.NewBadRequestError("invalid json body " + err.Error())
-		w.WriteHeader(restErr.Status)
-		w.Write(restErr.ResponseJSON().([]byte))
+	if err := conn.ReadJSON(&wsReq); err != nil {
+		log.Println("read message error " + err.Error())
 		return
 	}
-	defer r.Body.Close()
 
 	// client의 정보를 가져옴
 	user, err := chatHandler.userApp.GetUserByID(wsReq.UserID)
 	if err != nil {
-		w.WriteHeader(err.Status)
-		w.Write(err.ResponseJSON().([]byte))
-		return
-	}
-
-	// websocket 기능 추가
-	conn, wsErr := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		restErr := errors.NewInternalServerError("ws upgrade error " + wsErr.Error())
-		w.WriteHeader(restErr.Status)
-		w.Write(restErr.ResponseJSON().([]byte))
+		log.Println("get client err " + err.Message)
+		conn.WriteJSON(err)
 		return
 	}
 
 	// client의 정보를 토대로 ChatUser 객체 생성
 	chatClient := chat.NewChatUser(user.ID, user.Name, user.Nickname, conn, chatServer)
-
 	// 메시지 보내기를 눌렀을 때는 무조건 새로 생성
-	chatServer.CreateRoom(wsReq.ChatRoomName)
+	chatRoom := chatServer.CreateRoom(wsReq.ChatRoomName)
+	chatClient.ChatRooms[wsReq.ChatRoomName] = chatRoom
 
 	var chatServerReq chat.ChatServerRequest
 	chatServerReq.User = chatClient
@@ -102,7 +103,6 @@ func (chatHandler *ChatHandler) GetChatRoomInfo(w http.ResponseWriter, r *http.R
 
 	// 채팅룸이 기존에 존재하는지 새로 만들어야하는지 확인
 	isRoomExist := true
-	log.Println("checkpoint111111111111111111111111111111")
 	chatRoom, err := chatHandler.chatApp.GetChatRoom(chatReq.UserID, hostUserID, chatReq.StudyPostID) // chatReq.UserID = clientID
 	if err != nil {
 
