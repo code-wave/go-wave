@@ -67,7 +67,7 @@ func (users Users) PublicUsers() []interface{} {
 func (u *User) PublicUser() interface{} {
 	return &PublicUser{
 		ID:       u.ID,
-		Name:     u.Name,
+		Email:    u.Email,
 		Nickname: u.Nickname,
 	}
 }

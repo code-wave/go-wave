@@ -81,10 +81,10 @@ func (r *UserRepo) Get(user *entity.User) *errors.RestErr {
 	defer stmt.Close()
 
 	if err = stmt.QueryRow(user.ID).Scan(&user.ID, &user.Email, &user.Name, &user.Nickname, &user.CreatedAt, &user.UpdatedAt); err != nil {
-		if strings.Contains(err.Error(), "no rows in result set") {
-			log.Println("error when trying to scan after get user by id " + err.Error())
-			return errors.NewNoRowsError()
-		}
+		// if strings.Contains(err.Error(), "no rows in result set") {
+		// 	log.Println("error when trying to scan after get user by id " + err.Error())
+		// 	return errors.NewNoRowsError()
+		// }
 		log.Println("error when trying to scan after get user by id, ", err)
 		return errors.NewInternalServerError("database error")
 	}
