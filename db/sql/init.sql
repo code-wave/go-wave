@@ -55,11 +55,42 @@ create table study_post_tech_stack (
     FOREIGN KEY (tech_stack_id) REFERENCES tech_stack (id)
 );
 
+create table chat_room (
+    id serial NOT NULL,
+    room_name varchar(48) UNIQUE NOT NULL,
+    client_id bigint NOT NULL,
+    host_id bigint NOT NULL,
+    study_post_id bigint NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (client_id) REFERENCES users (id),
+    FOREIGN KEY (host_id) REFERENCES users (id),
+    FOREIGN KEY (study_post_id) REFERENCES study_post (id)
+);
+
+create table chat_message (
+    chat_room_id bigint NOT NULL,
+    chat_room_name varchar(48)  NOT NULL,
+    sender_id bigint NOT NULL,
+    sender varchar(48) NOT NULL,
+    message_type varchar(48) NOT NULL,
+    message text NOT NULL,
+    created_at timestamp NOT NULL,
+    FOREIGN KEY (chat_room_id) REFERENCES chat_room (id),
+    FOREIGN KEY (sender_id) REFERENCES users (id)
+);
+
 GRANT ALL PRIVILEGES ON TABLE users to project;
 GRANT ALL PRIVILEGES ON TABLE token to project;
 GRANT ALL PRIVILEGES ON TABLE study_post to project;
 GRANT ALL PRIVILEGES ON TABLE study_post_tech_stack to project;
 GRANT ALL PRIVILEGES ON TABLE tech_stack to project;
+GRANT ALL PRIVILEGES ON TABLE chat_room to project;
+GRANT ALL PRIVILEGES ON TABLE chat_message to project;
 
 insert into users (email, password, name, nickname, created_at) values ('test@naver.com', '1234', 'atg', 'nickname', NOW());
+insert into users (email, password, name, nickname, created_at) values ('kim@naver.com', '1234', 'fsdf', 'kim', NOW());
+insert into users (email, password, name, nickname, created_at) values ('han@naver.com', '1234', 'sdfdsf', 'han', NOW());
+
+insert into tech_stack (tech_name) values ('go');
+insert into tech_stack (tech_name) values ('react');
 commit;

@@ -10,7 +10,7 @@ import (
 
 type RedisService struct {
 	Auth    repository.AuthRepository
-	rClient *redis.Client
+	RClient *redis.Client
 }
 
 func NewRedisDB(host, port, password string) (*RedisService, error) {
@@ -29,6 +29,6 @@ func NewRedisDB(host, port, password string) (*RedisService, error) {
 
 	return &RedisService{
 		Auth:    NewAuthRepository(rClient),
-		rClient: rClient,
+		RClient: rClient,
 	}, nil
 }
