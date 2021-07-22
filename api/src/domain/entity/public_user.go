@@ -2,6 +2,6 @@ package entity
 
 type PublicUser struct {
 	ID       int64  `json:"id"`
-	Name     string `json:"name"`
+	Email    string `json:"email"`
 	Nickname string `json:"nickname"`
 }
