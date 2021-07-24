@@ -11,7 +11,6 @@ services:
             REDIS_HOST: redis
             REDIS_PORT: 6379
             REDIS_PASSWORD: redis_password
-        restart: always
 
     postgres:
         image: postgres:13.2
