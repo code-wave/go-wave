@@ -11,4 +11,5 @@ RUN apk add --no-cache bash \
 && apk add --no-cache libc6-compat
 COPY --from=builder /go/src /go/src
 COPY ./wait-for-it.sh /go/src/wait-for-it.sh
+RUN chmod +x /go/src/wait-for-it.sh
 WORKDIR /go/src
