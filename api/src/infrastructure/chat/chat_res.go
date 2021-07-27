@@ -8,7 +8,7 @@ import (
 
 type ChatResponse struct {
 	ChatRoom     *entity.ChatRoom `json:"chat_room"`
-	ChatMessages Messages         `json:"chat_messages"`
+	ChatMessages Messages         `json:"chat_messages"` // 기존에 저장된 메시지들
 }
 
 func (r *ChatResponse) ResponseJSON() ([]byte, error) {

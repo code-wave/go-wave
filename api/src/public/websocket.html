@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>WebSocket test</title>
+
+<body>
+    <input type="text" class="userbox1" placeholder="userID">
+    <input type="text" class="studyPostBox2" placeholder="studyPostID">
+    <button class="submitBtn1">Submit</button>
+    <script>
+        const userBox1 = document.querySelector(".userbox1")
+        const studyPostBox2 = document.querySelector(".studyPostBox2")
+        const submitBtn1 = document.querySelector(".submitBtn1")
+
+        submitBtn1.addEventListener("click", () => {
+            const userID = Number(userBox1.value)
+            const studyPostID = Number(studyPostBox2.value)
+
+            fetch("http://localhost:8080/chat/chatroom-info", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id: userID,
+                    study_post_id: studyPostID
+                })
+            })
+                .then(response => response.json())
+                .then(jsonData => console.log(jsonData))
+
+        });
+    </script>
+
+
+    <input type="text" class="box1" placeholder="userID">
+    <input type="text" class="box2" placeholder="chatRoomName">
+    <button class="submitBtn">Submit</button>
+    <button class="submitSendBtn">Send</button>
+
+    <script>
+        const box1 = document.querySelector(".box1")
+        const box2 = document.querySelector(".box2")
+        const submitBtn = document.querySelector(".submitBtn")
+        const submitSendBtn = document.querySelector(".submitSendBtn")
+
+        var wSocket
+        let userID
+        let chatRoomName
+
+        submitBtn.addEventListener("click", () => {
+            userID = Number(box1.value)
+            chatRoomName = box2.value
+            console.log(userID, chatRoomName)
+
+            wSocket = new WebSocket("ws://localhost:8080/ws");
+            wSocket.addEventListener("error", function (event) {
+                console.log("websocket error: ", event);
+            });
+            wSocket.onopen = function (event) {
+                console.log("ws open")
+                wSocket.send(JSON.stringify({
+                    user_id: userID,
+                    chat_room_name: chatRoomName
+                }));
+            }
+            wSocket.onmessage = (event) => {
+                console.log(event)
+            }
+        });
+
+        submitSendBtn.addEventListener("click", () => {
+            wSocket.send(JSON.stringify({
+                chat_room_id: 1,
+                chat_room_name: chatRoomName,
+                sender_id: userID,
+                sender_name: "fsdf",
+                message: "hello message test",
+                message_type: "1",
+                created_at: "2021-07-21"
+            }))
+
+            wSocket.onmessage = (event) => {
+                console.log(event)
+            }
+        })
+
+    </script>
+</body>
+
+</html>

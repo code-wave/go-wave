@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/code-wave/go-wave/infrastructure/chat"
+
 	"github.com/code-wave/go-wave/application"
 	"github.com/code-wave/go-wave/infrastructure/persistence"
 	"github.com/code-wave/go-wave/interfaces"
@@ -28,12 +30,15 @@ func main() {
 		return
 	}
 
+	chatServer := chat.NewChatServer(redisService, services.Chat)
+	go chatServer.Run()
+
 	r := chi.NewRouter()
 	//users
 	userApp := application.NewUserApp(services.User)
 	userHandler := interfaces.NewUserHandler(userApp)
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
+	// r.Get("/", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("hello")) })
 	r.Get("/users/{user_id}", userHandler.GetUser)
 	r.Get("/users/limit={limit}&offset={offset}", userHandler.GetAllUsers)
 	r.Post("/users/email-duplicated", userHandler.CheckDuplicatedEmail)
@@ -71,7 +76,16 @@ func main() {
 	r.Post("/tech-stack", techStackHandler.SaveTechStack)
 	r.Delete("/tech-stack/tech-name={tech_name}", techStackHandler.DeleteTechStack)
 
-	//cors option
+	//chat
+	chatApp := application.NewChatApp(services.Chat)
+	chatHandler := interfaces.NewChatHandler(userApp, studyPostApp, chatApp)
+
+	r.Post("/chat/chatroom-info", chatHandler.GetChatRoomInfo)
+	r.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		chatHandler.ServeChatWs(chatServer, w, r)
+	})
+
+	// cors option
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,

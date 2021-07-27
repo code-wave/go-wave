@@ -21,7 +21,9 @@ services:
             REDIS_PASSWORD: ${REDIS_PASSWORD}
         ports:
             - 58080:8080
-        command: ./start
+        # postgres 실행될 때까지 10초 기다리고 그 다음 또 redis 실행될 때까지 10초 기다리게 설정(임시)
+        # postgres, redis에 대해 동시에 기다려야 하는데 지금은 postgres 기다리고 redis를 나중에 기다리는 형태 수정 필요
+        command: bash -c "./wait-for-it.sh postgres:5432 -t 10 -- ./wait-for-it.sh redis:6379 -t 10 -- /go/src/go-wave"
 
     postgres:
         image: postgres:13.2

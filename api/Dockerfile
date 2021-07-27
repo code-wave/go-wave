@@ -1,9 +1,15 @@
 FROM golang:1.15.7 as builder
-
 WORKDIR /go/src
 COPY ./src /go/src
-RUN go build -o start
+RUN go build -o go-wave
 
-FROM golang:1.15.7
+# FROM golang:1.15.7
+FROM alpine:latest
+# this is for using bash(because alpine has no bash(default ash/sh)) 
+RUN apk add --no-cache bash \
+# this is for running go binary with in alpine container
+&& apk add --no-cache libc6-compat
 COPY --from=builder /go/src /go/src
+COPY ./wait-for-it.sh /go/src/wait-for-it.sh
+RUN chmod +x /go/src/wait-for-it.sh
 WORKDIR /go/src
