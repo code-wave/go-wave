@@ -31,15 +31,19 @@ func NewChatApp(chatRepo repository.ChatRepository) *ChatApp {
 func (chatApp *ChatApp) GetChatRoom(clientID, hostID, studyPostID int64) (*entity.ChatRoom, *errors.RestErr) {
 	return chatApp.chatRepo.GetChatRoom(clientID, hostID, studyPostID)
 }
+
 func (chatApp *ChatApp) SaveChatRoom(clientID, hostID, studyPostID int64) (*entity.ChatRoom, *errors.RestErr) {
 	return chatApp.chatRepo.SaveChatRoom(clientID, hostID, studyPostID)
 }
+
 func (chatApp *ChatApp) GetChatRoomByRoomName(roomName string) (*entity.ChatRoom, *errors.RestErr) {
 	return nil, nil
 }
+
 func (chatApp *ChatApp) GetChatRoomByID(id int64) (*entity.ChatRoom, *errors.RestErr) {
 	return nil, nil
 }
+
 func (chatApp *ChatApp) SaveChatMessage(msg *entity.ChatMessage) (*entity.ChatMessage, *errors.RestErr) {
 	return nil, nil
 }
