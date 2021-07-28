@@ -80,3 +80,33 @@ func TestSavePost_WithWrongUserID(t *testing.T) {
 	//	t.Error(err)
 	//}
 }
+
+func TestGetPost(t *testing.T) {
+	var studyPostID int64
+
+	studyPostID = -1 // wrong study post id
+	_, err := sApp.GetPost(studyPostID)
+	if err == nil { // an error will be occurred because of wrong id
+		t.Error(err)
+	}
+
+	studyPostID = 1 // put at least one studypost before testing this
+	_, err = sApp.GetPost(studyPostID)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetPostsInLatestOrder(t *testing.T) {
+	var limit, offset int64
+	limit, offset = 10, 0
+	posts, err := sApp.GetPostsInLatestOrder(limit, offset)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(posts) > int(limit) {
+		t.Errorf("limit is %d but get more", limit)
+	}
+
+}
