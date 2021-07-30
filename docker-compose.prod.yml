@@ -3,13 +3,22 @@ version: "3.8"
 services:
     nginx:
         image: nginx
-    #     volumes:
-    #         - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+        build:
+            context: ./nginx
+            dockerfile: Dockerfile.react
         ports:
             - 8081:80
+    
+    react:
+        image: atg0831/code-wave-react
+        command: ["yarn", "serve", "-s", "build"]
+        ports:
+            - 5000:5000
 
     api:
-        build: ./api
+        build:
+            context: ./api
+            dockerfile: Dockerfile.api
         environment:
             POSTGRES_PASSWORD: ${PG_PASSWORD}
             POSTGRES_USER: ${PG_USER}
@@ -56,6 +65,8 @@ services:
         volumes:
             - "redis_data:/data"
         command: redis-server --requirepass ${REDIS_PASSWORD}
+    
+
 
 volumes:
     postgres_data:
