@@ -89,8 +89,8 @@ func main() {
 
 	// cors option
 	c := cors.New(cors.Options{
-		// nginx 주소만 origin 허용
-		// AllowedOrigins:   []string{"http://localhost:8081"},
+		// proxy server 주소만 origin 허용
+		// AllowedOrigins: []string{"http://localhost:8081"},
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
 		// Enable Debugging for testing, consider disabling in production
