@@ -22,4 +22,4 @@ fi
 
 sleep 0.5s
 echo -e "\nContainers Status"
-docker compose ps
+docker-compose ps
