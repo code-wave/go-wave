@@ -9,7 +9,7 @@ services:
 
     react:
         # image from docker atg0831 docker hub
-        image: atg0831/code-wave-react:1.1.0
+        image: atg0831/code-wave-react:1.1.1
     api:
         build:
             context: ./api
