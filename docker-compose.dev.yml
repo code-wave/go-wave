@@ -1,6 +1,9 @@
 version: "3.8"
 
 services:
+    proxy:
+        ports:
+            - 8081:80
     api:
         ports:
             - 58080:8080

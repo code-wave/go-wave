@@ -5,10 +5,10 @@ services:
         ports:
             - 8081:80
     
-    react:
-        command: ["yarn", "serve", "-s", "build"]
-        ports:
-            - 5000:5000
+    # react:
+    #     command: ["yarn", "serve", "-s", "build"]
+    #     ports:
+    #         - 5000:5000
 
     api:
         environment:
