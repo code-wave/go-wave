@@ -1,0 +1,19 @@
+# build-stage
+# image from atg0831's docker hub
+FROM atg0831/code-wave-react:1.1.1 as builder
+
+# production-stage
+FROM nginx:latest
+
+WORKDIR /app
+RUN rm /etc/nginx/nginx.conf
+COPY ./server.conf /etc/nginx/conf.d/
+COPY ./nginx.conf /etc/nginx/
+# build-stage react's build file to nginx
+COPY --from=builder /app/build/ /usr/share/nginx/html
+
+# port 80 open
+EXPOSE 80
+# run nginx server foreground
+CMD ["nginx", "-g", "daemon off;"]
+

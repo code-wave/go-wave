@@ -1,8 +1,14 @@
--- CREATE USER project WITH PASSWORD 'password';
--- CREATE DATABASE projectdb;
-GRANT ALL PRIVILEGES ON DATABASE projectdb TO project;
+#!bin/bash
 
-\c projectdb;
+set -e
+
+echo '*****************************'
+echo "Connecting postgres database engine..."
+
+PGPASSWORD="$POSTGRES_PASSWORD" psql -U $POSTGRES_USER -d $POSTGRES_DB  -W <<-EOSQL
+GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_DB TO $POSTGRES_USER;
+
+\c $POSTGRES_DB;
 
 create table users (
     id serial NOT NULL,
@@ -79,13 +85,13 @@ create table chat_message (
     FOREIGN KEY (sender_id) REFERENCES users (id)
 );
 
-GRANT ALL PRIVILEGES ON TABLE users to project;
-GRANT ALL PRIVILEGES ON TABLE token to project;
-GRANT ALL PRIVILEGES ON TABLE study_post to project;
-GRANT ALL PRIVILEGES ON TABLE study_post_tech_stack to project;
-GRANT ALL PRIVILEGES ON TABLE tech_stack to project;
-GRANT ALL PRIVILEGES ON TABLE chat_room to project;
-GRANT ALL PRIVILEGES ON TABLE chat_message to project;
+GRANT ALL PRIVILEGES ON TABLE users to $POSTGRES_USER;
+GRANT ALL PRIVILEGES ON TABLE token to $POSTGRES_USER;
+GRANT ALL PRIVILEGES ON TABLE study_post to $POSTGRES_USER;
+GRANT ALL PRIVILEGES ON TABLE study_post_tech_stack to $POSTGRES_USER;
+GRANT ALL PRIVILEGES ON TABLE tech_stack to $POSTGRES_USER;
+GRANT ALL PRIVILEGES ON TABLE chat_room to $POSTGRES_USER;
+GRANT ALL PRIVILEGES ON TABLE chat_message to $POSTGRES_USER;
 
 insert into users (email, password, name, nickname, created_at) values ('test@naver.com', '1234', 'atg', 'nickname', NOW());
 insert into users (email, password, name, nickname, created_at) values ('kim@naver.com', '1234', 'fsdf', 'kim', NOW());
@@ -94,3 +100,6 @@ insert into users (email, password, name, nickname, created_at) values ('han@nav
 insert into tech_stack (tech_name) values ('go');
 insert into tech_stack (tech_name) values ('react');
 commit;
+EOSQL
+echo "initializing sql done"
+echo '*****************************'

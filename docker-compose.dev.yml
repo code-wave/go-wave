@@ -1,7 +1,12 @@
 version: "3.8"
 
 services:
+    proxy:
+        ports:
+            - 8081:80
     api:
+        ports:
+            - 58080:8080
         environment:
             POSTGRES_PASSWORD: password
             POSTGRES_USER: project
@@ -13,37 +18,23 @@ services:
             REDIS_PASSWORD: redis_password
 
     postgres:
-        image: postgres:13.2
         ports:
             - 54320:5432
         environment:
             POSTGRES_PASSWORD: password
             POSTGRES_USER: project
             POSTGRES_DB: projectdb
-        volumes:
-            - ./db/sql/:/docker-entrypoint-initdb.d/
-            - postgres_data:/var/lib/postgresql/data
 
     pgadmin:
-        image: dpage/pgadmin4
         ports:
             - 54330:80
         environment:
             PGADMIN_DEFAULT_EMAIL: admin@admin.com
             PGADMIN_DEFAULT_PASSWORD: password
-        volumes:
-            - pgadmin_data:/var/lib/pgadmin
 
     redis:
-        image: "redis:alpine"
         ports:                  
             - "56379:6379"
         environment:
             REDIS_PASSWORD: redis_password
-        volumes:
-            - "redis_data:/data"
         command: redis-server --requirepass redis_password
-        
-volumes:
-    postgres_data:
-    redis_data:

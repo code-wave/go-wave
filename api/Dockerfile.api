@@ -9,7 +9,7 @@ FROM alpine:latest
 RUN apk add --no-cache bash \
 # this is for running go binary with in alpine container
 && apk add --no-cache libc6-compat
-COPY --from=builder /go/src /go/src
 COPY ./wait-for-it.sh /go/src/wait-for-it.sh
 RUN chmod +x /go/src/wait-for-it.sh
+COPY --from=builder /go/src /go/src
 WORKDIR /go/src

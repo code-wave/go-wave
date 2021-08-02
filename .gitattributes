@@ -1,1 +1,2 @@
-wait-for-it.sh eol=lf
+*.sh eol=lf
+./db/sql/*.sh eol=lf
