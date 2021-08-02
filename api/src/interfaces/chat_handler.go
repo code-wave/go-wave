@@ -38,7 +38,6 @@ func NewChatHandler(userApp application.UserAppInterface, studyPostApp applicati
 
 // ServeChatWs: roomName과 유저정보를 보내면 websocket 연결시켜줌
 func (chatHandler *ChatHandler) ServeChatWs(chatServer *chat.ChatServer, w http.ResponseWriter, r *http.Request) {
-	helpers.SetJsonHeader(w)
 	log.Println("ws conneting....")
 
 	// websocket 기능 추가
