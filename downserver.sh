@@ -7,7 +7,7 @@ if [[ -z "$1" ]] || [[ "$1" = *"-"* ]]; then
     echo "All services down ..."
 else
     # docker compose stop $1
-    docker-compose rm --stop $1 
+    docker-compose stop $1 && docker-compose rm $1
     echo "Service" $1 "down ..."
 fi
 

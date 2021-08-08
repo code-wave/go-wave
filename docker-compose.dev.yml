@@ -16,6 +16,9 @@ services:
             REDIS_HOST: redis
             REDIS_PORT: 6379
             REDIS_PASSWORD: redis_password
+            ACCESS_TOKEN_KEY: access_token
+            REFRESH_TOKEN_KEY: refresh_token
+            TOKEN_ISSUER: token_issuer
 
     postgres:
         ports:
