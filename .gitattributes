@@ -1,2 +1,2 @@
 *.sh eol=lf
-./db/sql/*.sh eol=lf
+# ./db/sql/*.sh eol=lf

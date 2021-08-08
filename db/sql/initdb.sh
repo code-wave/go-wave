@@ -21,14 +21,6 @@ create table users (
     PRIMARY KEY (id)
 );
 
-create table token (
-    id serial NOT NULL,
-    email varchar(48) NOT NULL UNIQUE,
-    refresh_token text UNIQUE,
-    expires_at timestamp,
-    PRIMARY KEY (id)
-);
-
 create table study_post (
 	id serial NOT NULL,
 	user_id bigint NOT NULL,
