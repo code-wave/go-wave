@@ -7,15 +7,10 @@ services:
             context: ./nginx
             dockerfile: Dockerfile.nginx
 
-    # react:
-    #     # image from docker atg0831 docker hub
-    #     image: atg0831/code-wave-react:1.1.1
-
     api:
         build:
             context: ./api
             dockerfile: Dockerfile.api
-        # postgres, redis에 대해 동시에 기다려야 하는데 지금은 postgres 기다리고 redis를 나중에 기다리는 형태 수정 필요
         command: bash -c "./wait-for-it.sh postgres:5432 -t 12 -- ./wait-for-it.sh redis:6379 -t 10 -- /go/src/go-wave"
 
     postgres:
