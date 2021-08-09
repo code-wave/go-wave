@@ -32,11 +32,6 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 ```
 
 - **Production Mode**
-- down(stop and remove)containers
-```bash
-./downserver.sh 
-```
-
 ```bash
 # run prod mode using shell script
 ./runserver.sh --prod 
