@@ -65,6 +65,11 @@ func (s *studyPostApp) GetPost(studyPostID int64) (*entity.StudyPost, *errors.Re
 }
 
 func (s *studyPostApp) GetPostsInLatestOrder(limit, offset int64) (entity.StudyPosts, *errors.RestErr) {
+	var studyPosts []entity.StudyPost
+	if offset < 0 {
+		return studyPosts, errors.NewBadRequestError("offset can't be negative")
+	}
+
 	return s.studyPostRepo.GetPostsInLatestOrder(limit, offset)
 }
 

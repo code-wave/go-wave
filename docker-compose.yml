@@ -1,61 +1,34 @@
 version: "3.8"
 
 services:
-    # nginx:
-    #     image: nginx
-    #     volumes:
-    #         - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-    #     ports:
-    #         - 80:80
+    proxy:
+        image: nginx:1.21.1
+        build:
+            context: ./nginx
+            dockerfile: Dockerfile.nginx
 
     api:
-        build: ./api
-        environment:
-            POSTGRES_PASSWORD: ${PG_PASSWORD}
-            POSTGRES_USER: ${PG_USER}
-            POSTGRES_DB: ${PG_DB_NAME}
-            POSTGRES_HOST: ${PG_HOST}
-            POSTGRES_PORT: ${PG_PORT}
-            REDIS_HOST: ${REDIS_HOST}
-            REDIS_PORT: ${REDIS_PORT}
-            REDIS_PASSWORD: ${REDIS_PASSWORD}
-        ports:
-            - 58080:8080
-        # postgres 실행될 때까지 10초 기다리고 그 다음 또 redis 실행될 때까지 10초 기다리게 설정(임시)
-        # postgres, redis에 대해 동시에 기다려야 하는데 지금은 postgres 기다리고 redis를 나중에 기다리는 형태 수정 필요
-        command: bash -c "./wait-for-it.sh postgres:5432 -t 10 -- ./wait-for-it.sh redis:6379 -t 10 -- /go/src/go-wave"
+        build:
+            context: ./api
+            dockerfile: Dockerfile.api
+        command: bash -c "./wait-for-it.sh postgres:5432 -t 12 -- ./wait-for-it.sh redis:6379 -t 10 -- /go/src/go-wave"
 
     postgres:
         image: postgres:13.2
-        ports:
-            - 54320:5432
-        environment:
-            POSTGRES_PASSWORD: ${PG_PASSWORD}
-            POSTGRES_USER: ${PG_USER}
-            POSTGRES_DB: ${PG_DB_NAME}
         volumes:
             - ./db/sql/:/docker-entrypoint-initdb.d/
             - postgres_data:/var/lib/postgresql/data
     
     pgadmin:
         image: dpage/pgadmin4
-        ports:
-            - 54330:80
-        environment:
-            PGADMIN_DEFAULT_EMAIL: ${PG_ADMIN}
-            PGADMIN_DEFAULT_PASSWORD: ${PG_ADMIN_PASSWORD}
         volumes:
             - pgadmin_data:/var/lib/pgadmin
 
     redis:
         image: "redis:alpine"
-        ports:                  
-            - "56379:6379"
-        environment:
-            REDIS_PASSWORD: ${REDIS_PASSWORD}
         volumes:
             - "redis_data:/data"
-        command: redis-server --requirepass ${REDIS_PASSWORD}
+
 
 volumes:
     postgres_data:

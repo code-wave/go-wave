@@ -27,9 +27,9 @@ type StudyPost struct {
 }
 
 func (s *StudyPost) Validate(method string) *errors.RestErr {
-	if method == http.MethodPatch {
+	if method == http.MethodPatch || method == http.MethodPost {
 		if s.ID <= 0 {
-			return errors.NewBadRequestError("id is required")
+			return errors.NewBadRequestError("id is not validated")
 		}
 	}
 
