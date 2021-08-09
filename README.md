@@ -3,13 +3,15 @@
 
 
 
-## Envirionment & Prerequisites
+## Envirionment
 
 | Name | Version | Link |
 |:-:|:-:|:-:|
 | Docker | 20.10.7 | <https://docs.docker.com/engine/install/> |
 | Docker-compose | 1.27.0 | <https://docs.docker.com/compose/install/> |
-| Compose file version | 3.8 | <https://docs.docker.com/compose/compose-file/compose-file-v3/> |
+| Compose file  | 3.8 | <https://docs.docker.com/compose/compose-file/compose-file-v3/> |
+| golang | 1.15.7 | <https://golang.org/dl> |
+
 
 ---
 
