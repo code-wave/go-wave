@@ -68,16 +68,16 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 
 ## Deploy Ports
 
-| Name     | Port # |
-|:--------:|:------:|
-| proxy    | 8081   |
-| api      | 58080  |
-| postgres | 54320  |
-| pgadmin  | 54330  |
-| redis    | 56379  |
+|Container Name |  # Port   |
+|:-------------:|:---------:|
+|   proxy       |   8081    |
+|   api         |   58080   |
+|   postgres    |   54320   |
+|   pgadmin     |   54330   |
+|   redis       |   56379   |
 
 
 ## Contributors' info
   
-Taegeon An - <https://github.com/atg0831>
+Taegeon An - <https://github.com/atg0831>  
 Jungmin Kim - <https://github.com/PudgeKim>
