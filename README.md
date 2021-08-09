@@ -1,5 +1,9 @@
 # go-wave
 > Web project for recruting programming study and team project members
+<<<<<<< HEAD
+=======
+---
+>>>>>>> 764382abe57948bc4d13ce5abd2181ad21c064e3
 
 ## Envirionment & Prerequisites
 
@@ -17,8 +21,13 @@
 git clone https://github.com/atg0831/go-wave.git
 cd go-wave
 ```
+<<<<<<< HEAD
 ### Run Containers
 - **Develop Mode**
+=======
+### Develop mode
+- run containers
+>>>>>>> 764382abe57948bc4d13ce5abd2181ad21c064e3
 ```bash
 # run dev mode using shell script
 ./runserver.sh --dev
@@ -28,7 +37,17 @@ cd go-wave
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 ```
 
+<<<<<<< HEAD
 - **Production Mode**
+=======
+- down(stop and remove)containers
+```bash
+./downserver.sh 
+```
+
+### Production mode
+- run containers
+>>>>>>> 764382abe57948bc4d13ce5abd2181ad21c064e3
 ```bash
 # run prod mode using shell script
 ./runserver.sh --prod 
@@ -38,7 +57,11 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
+<<<<<<< HEAD
 ### Down Containers
+=======
+- down(stop and remove)containers
+>>>>>>> 764382abe57948bc4d13ce5abd2181ad21c064e3
 ```bash
 ./downserver.sh 
 ```
@@ -48,6 +71,7 @@ docker-compose down
 ```
 
 ## Each services role
+<<<<<<< HEAD
 - **proxy** 
    - A container for the reverse proxy role. When connecting to the Nginx server, the static files built by the react(frontend) server are displayed. And if you access the /api path, it will route to the api server.
 - **api**
@@ -57,12 +81,24 @@ docker-compose down
 - **pgadmin**
    - A container to easily manage PostgreSQL database with GUI
 - **redis**
+=======
+- proxy 
+   - A container for the reverse proxy role. When connecting to the Nginx server, the static files built by the react(frontend) server are displayed. And if you access the /api path, it will route to the api server.
+- api
+   - A container that receives requests from clients and sends responses back to clients.
+- postgres
+   - PostgreSQL Database container
+- pgadmin
+   - A container to easily manage PostgreSQL database with GUI
+- redis
+>>>>>>> 764382abe57948bc4d13ce5abd2181ad21c064e3
    - A container that is in-memory key-value data structure store and support pub/sub for chat
 
 ---
 
 ## Deploy Ports
 
+<<<<<<< HEAD
 |Container Name |   # Port   |
 |:-------------:|:----------:|
 |   proxy       |    8081    |
@@ -70,6 +106,15 @@ docker-compose down
 |   postgres    |    54320   |
 |   pgadmin     |    54330   |
 |   redis       |    56379   |
+=======
+|Container Name |  # Port   |
+|:-------------:|:---------:|
+|   proxy       |   8081    |
+|   api         |   58080   |
+|   postgres    |   54320   |
+|   pgadmin     |   54330   |
+|   redis       |   56379   |
+>>>>>>> 764382abe57948bc4d13ce5abd2181ad21c064e3
 
 ---
 
