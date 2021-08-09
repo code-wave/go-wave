@@ -52,7 +52,7 @@ docker-compose down
 
 ## Each services role
 - **proxy** 
-   - A container for the reverse proxy role. When connecting to the Nginx server, the static files built by the react(frontend) server are displayed. And if you access the /api path, it will route to the api server.
+   - A container for the reverse proxy role. When connecting to the Nginx server, the static files built by the react(frontend) server are displayed. And if you access the `/api` path, it will route to the api server.
 - **api**
    - A container that receives requests from clients and sends responses back to clients.
 - **postgres**
