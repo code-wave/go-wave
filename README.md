@@ -78,10 +78,6 @@ docker-compose down
 
 
 ---
-## Project Explaination
-[code-wave](https://walnut-limit-94d.notion.site/Code-Wave-2021-06-2021-08-4d62a9b26ab74834903391113d1566a4)
-
----
 ## Contributors' info
 Taegeon An - <https://github.com/atg0831>  
 Jungmin Kim - <https://github.com/PudgeKim>
