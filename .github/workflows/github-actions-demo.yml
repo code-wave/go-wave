@@ -17,4 +17,4 @@ jobs:
       - run: chmod +x ./runserver.sh
       - name: run server
         run: ./runserver.sh --dev
-      - run: echo "This job's status is ${{ github.status}}."
+      - run: echo "This job's status is ${{ github.status }}."
