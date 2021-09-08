@@ -1,0 +1,16 @@
+name: go-wave-workflow
+on: [push, pull_request]
+jobs:
+  go-wave:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: grant permission to runserver.sh
+        run: chmod +x ./runserver.sh
+      - name: run server by script
+        env:
+          GITHUB_INPUT: password
+        run: ./runserver.sh --dev
+      - name: watch api logs
+        run: docker-compose logs -f api
+      
