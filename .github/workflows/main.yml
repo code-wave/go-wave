@@ -8,9 +8,7 @@ jobs:
       - name: grant permission to runserver.sh
         run: chmod +x ./runserver.sh
       - name: run server by script
-        env:
-          GITHUB_INPUT: password
         run: ./runserver.sh --dev
       - name: watch api logs
-        run: docker-compose logs -f api
+        run: docker-compose logs
       
