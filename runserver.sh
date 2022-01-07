@@ -9,7 +9,7 @@ elif [[ "$1" = "--dev" ]]; then
     echo "Run $2 server for develop mode..."
     docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build $2
 else
-    echo "Usage: bash runserver.sh [--dev | --prod]"
+    echo "Usage: bash runserver.sh [--dev | --local]"
 fi
 
 
