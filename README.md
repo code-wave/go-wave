@@ -22,25 +22,25 @@ git clone https://github.com/atg0831/go-wave.git
 cd go-wave
 ```
 ### Run Containers
-- **Develop Mode**
+- **Local Mode**
 
 ```bash
 # run dev mode using shell script
-./runserver.sh --dev
+./runserver.sh --local
+```
+```bash
+# Or you can just use docker-compose command
+docker-compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+```
+
+- **Develop Mode**
+```bash
+# run dev mode using shell script
+./runserver.sh --dev 
 ```
 ```bash
 # Or you can just use docker-compose command
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
-```
-
-- **Production Mode**
-```bash
-# run prod mode using shell script
-./runserver.sh --prod 
-```
-```bash
-# Or you can just use docker-compose command
-docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
 ### Down Containers
