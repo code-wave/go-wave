@@ -8,7 +8,7 @@ jobs:
       - name: grant permission to runserver.sh
         run: chmod +x ./runserver.sh
       - name: run server by script
-        run: ./runserver.sh --dev
+        run: ./runserver.sh --local
       - name: watch api logs
         run: docker-compose logs
       
